@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bitlog-cache-v27'; // アプリを更新した時はこの名前を変更する（例: v28）
+const CACHE_NAME = 'bitlog-cache-v29'; // アプリを更新した時はこの名前を変更する（例: v28）
 const urlsToCache = [
   './',
   './index.html',

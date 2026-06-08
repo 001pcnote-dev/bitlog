@@ -1,7 +1,7 @@
 {
   "name": "bit log",
   "short_name": "bit log",
-  "description": "データベース構築ツール v27",
+  "description": "データベース構築ツール v29",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#f8fafc",
