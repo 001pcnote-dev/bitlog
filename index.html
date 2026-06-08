@@ -244,7 +244,7 @@ function startupNew() { document.getElementById('startup-modal').style.display =
             </h2>
             <form id="game-form">
                 <div class="form-row">
-                    <div class="form-group" style="flex:2;"><label>タイトル *</label><input type="text" id="game-title" required></div>
+                    <div class="form-group" style="flex:2;"><label>タイトル</label><input type="text" id="game-title" placeholder="未入力可（JANからAIが補完）"></div>
                     <div class="form-group" style="flex:1;">
                         <label>対応ハード</label>
                         <select id="game-platform">
@@ -618,11 +618,18 @@ function startupNew() { document.getElementById('startup-modal').style.display =
     }
 
     // --- 画像・スキャン ---
-    function searchOnGoogle() {
-        const t = document.getElementById('game-title').value.trim(), p = document.getElementById('game-platform').value;
-        if(!t) return alert("タイトルを入力してください。");
-        window.open(`https://www.google.com/search?q=${encodeURIComponent(`${t} ${p} パッケージ`)}&tbm=isch`, '_blank');
-    }
+function searchOnGoogle() {
+        const t = document.getElementById('game-title').value.trim();
+        const p = document.getElementById('game-platform').value;
+        const jan = document.getElementById('game-jan').value.trim();
+        
+        // タイトルが仮のもの、または空の場合はJANコードを検索クエリにする
+        const isPlaceholder = t.includes('⏳ AI取得待ち');
+        const query = (t && !isPlaceholder) ? `${t} ${p} パッケージ` : `${jan} ゲーム パッケージ`;
+        
+        if(!query.trim()) return alert("タイトルかJANコードを入力してください。");
+        window.open(`https://www.google.com/search?q=${encodeURIComponent(query)}&tbm=isch`, '_blank');
+    }   
     function clearImage() { document.getElementById('game-image').value = ''; document.getElementById('form-img-preview').src = fallbackSrc; }
     function setupDragAndDrop() {
         const dz = document.getElementById('drop-zone');
@@ -689,9 +696,24 @@ function startupNew() { document.getElementById('startup-modal').style.display =
             selectedDots.push(chip.dataset.color);
         });
 
+        let titleVal = document.getElementById('game-title').value.trim();
+        const janVal = document.getElementById('game-jan').value.trim();
+
+        // タイトルもJANも無い場合は弾く
+        if (!titleVal && !janVal) {
+            alert("タイトルかJANコードのどちらかは入力してください。");
+            return;
+        }
+
+        // JANのみ入力されている場合は仮タイトルをセット
+        if (!titleVal && janVal) {
+            titleVal = "⏳ AI取得待ち (JAN: " + janVal + ")";
+        }
+
         const data = {
-            title: document.getElementById('game-title').value.trim(), platform: document.getElementById('game-platform').value, 
-            jan: document.getElementById('game-jan').value.trim(), series: document.getElementById('game-series').value.trim(),
+            title: titleVal, platform: document.getElementById('game-platform').value, 
+            jan: janVal, series: document.getElementById('game-series').value.trim(),
+
             model: document.getElementById('game-model').value.trim(), release: document.getElementById('game-release').value.trim(), 
             publisher: document.getElementById('game-publisher').value.trim(), developer: document.getElementById('game-developer').value.trim(),
             genre: document.getElementById('game-genre').value.trim(), rating: document.getElementById('game-rating').value,
@@ -923,15 +945,23 @@ function startupNew() { document.getElementById('startup-modal').style.display =
     function editFromViewer() { if (currentViewIndex !== -1) { const idx = currentViewIndex; closeModal(); loadToEditor(idx); } }
 
     // --- AI ---
-    const fieldNames = { title: 'タイトル', model: '型番', jan: 'JAN', release: '発売日', publisher: '販売', developer: '開発', genre: 'ジャンル', series: 'シリーズ', price: '定価' };
+const fieldNames = { title: 'タイトル', platform: '機種', model: '型番', jan: 'JAN', release: '発売日', publisher: '販売', developer: '開発', genre: 'ジャンル', series: 'シリーズ', price: '定価' };
     let pendingAIUpdates = [];
 
     function updatePromptPreview() {
         const preview = document.getElementById('prompt-preview'); const aiList = [];
         gameList.forEach((g, idx) => { if (!g.isLocked) { aiList.push({ _id: idx, title: g.title, platform: g.platform, model: g.model || "", jan: g.jan || "", release: g.release || "", publisher: g.publisher || g.maker || "", developer: g.developer || "", genre: g.genre || "", series: g.series || "", price: g.price || "" }); } });
         if(aiList.length === 0) { preview.value = "対象データがありません。"; return; }
-        preview.value = `以下のゲームリストの不足情報（型番、JAN、発売日、販売/開発メーカー、ジャンル、シリーズ名、定価）を補完してください。\n【重要】1. タイトルに誤字脱字、サブタイトル省略がある場合は正式名称に修正。\n2. 純粋なJSON配列で返すこと。\n3. 「_id」は絶対に変更しないこと。\n${JSON.stringify(aiList, null, 2)}`;
-    }
+preview.value = `あなたは優秀なデータベース管理者です。以下のゲームリストの情報を調査し、補完・修正してください。
+
+【重要ルール - 必ず遵守すること】
+1. タイトルが「⏳ AI取得待ち」を含んでいるデータは、必ず「JANコード」を絶対的なキーとして検索し、正しい「タイトル」と「対応ハード(platform)」を特定して上書きしてください。
+2. すでに入力されているタイトルやハードであっても、JANコードの情報と矛盾する場合は、JANコードから得られた情報を正として上書き修正してください。
+3. タイトルに誤字脱字や省略がある場合は、正式名称に修正してください。
+4. Markdownのコードブロック（\`\`\`json 等）や挨拶などの余計なテキストは一切含めず、純粋なJSON配列のみを出力してください。
+5. 「_id」はシステム用のIDです。絶対に変更・削除しないでください。
+
+${JSON.stringify(aiList, null, 2)}`;    }
     function copyPrompt() { 
         const prompt = document.getElementById('prompt-preview').value;
         if(navigator.clipboard && window.isSecureContext) { navigator.clipboard.writeText(prompt).then(() => alert('コピーしました。')); } 
@@ -952,7 +982,7 @@ function startupNew() { document.getElementById('startup-modal').style.display =
                 if (aiG._id !== undefined && aiG._id >= 0 && aiG._id < gameList.length) {
                     const local = gameList[aiG._id];
                     if (local && !local.isLocked) {
-                        ['title','model','jan','release','publisher','developer','genre','series','price'].forEach(k => { 
+                        ['title','platform','model','jan','release','publisher','developer','genre','series','price'].forEach(k => { 
                             if(aiG[k] && local[k] !== aiG[k]) { 
                                 pendingAIUpdates.push({ id: aiG._id, title: local.title, field: k, fieldName: fieldNames[k] || k, oldVal: local[k] != null ? String(local[k]) : '', newVal: aiG[k] != null ? String(aiG[k]) : '' });
                             }
