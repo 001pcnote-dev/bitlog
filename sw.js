@@ -1,11 +1,12 @@
-const CACHE_NAME = 'bitlog-cache-v29'; // アプリを更新した時はこの名前を変更する（例: v28）
+const CACHE_NAME = 'bitlog-cache-v35'; // アプリを更新した時はこの名前を変更する（例: v28）
 const urlsToCache = [
   './',
   './index.html',
   './manifest.json',
   './icon-192.png',
   './icon-512.png',
-  './quagga.min.js' // ★外部URLではなく、ローカルのQuagga.jsをキャッシュするように修正
+  './quagga.min.js',
+  './chart.js'
 ];
 
 self.addEventListener('install', event => {

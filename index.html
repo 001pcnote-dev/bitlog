@@ -1,21 +1,18 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>bit log | データベース構築ツール v29 (Minimalist)</title>
+    <title>bit log | データベース構築ツール v34 (Custom Platform & AI Batch)</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0f172a">
     
     <style>
         :root {
-            /* 洗練されたカラーパレット */
             --bg-color: #f8fafc; --primary-color: #0f172a; --accent-color: #0ea5e9;
             --success-color: #10b981; --warning-color: #f59e0b; --danger-color: #ef4444;
             --text-color: #334155; --text-muted: #64748b; 
             --card-bg: #ffffff; --border-color: #e2e8f0; --border-light: #f1f5f9;
-            
-            /* 新たなデザインシステム（角丸と影） */
             --radius-sm: 6px; --radius-md: 10px; --radius-lg: 14px;
             --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
             --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
@@ -28,33 +25,24 @@
         .container { max-width: 1200px; margin: 0 auto; }
 
         /* ヘッダー */
-        .app-header { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            margin-bottom: 12px; 
-            padding-bottom: 10px; 
-            border-bottom: 1px solid var(--border-light); 
-            flex-wrap: nowrap; 
-            gap: 8px;
-        }
+        .app-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid var(--border-light); flex-wrap: nowrap; gap: 8px; }
         .app-title-area { display: flex; align-items: center; gap: 6px; cursor: pointer; }
         .app-title { font-size: 16px; font-weight: 800; color: var(--primary-color); letter-spacing: -0.5px; margin: 0; }
         .app-title span { font-size: 11px; font-weight: normal; color: var(--text-muted); }
         .sync-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background-color: var(--danger-color); transition: var(--transition); }
         .sync-dot.active { background-color: var(--success-color); box-shadow: 0 0 6px var(--success-color); }
 
-        .header-controls { display: flex; gap: 0; align-items: center; }
+        .header-controls { display: flex; gap: 0; align-items: center; overflow-x: auto; }
         .tab-nav { display: flex; gap: 4px; background: var(--border-light); padding: 3px; border-radius: var(--radius-md); }
-        .tab-btn { padding: 6px 12px; border: none; background: transparent; border-radius: var(--radius-sm); font-size: 11px; font-weight: 600; color: var(--text-muted); cursor: pointer; transition: var(--transition); }
+        .tab-btn { padding: 6px 12px; border: none; background: transparent; border-radius: var(--radius-sm); font-size: 11px; font-weight: 600; color: var(--text-muted); cursor: pointer; transition: var(--transition); white-space: nowrap; }
         .tab-btn:hover { color: var(--primary-color); }
         .tab-btn.active { background: var(--card-bg); color: var(--accent-color); box-shadow: var(--shadow-sm); }
 
-        @media(max-width: 600px) {
-            body { padding: 8px; }
-            .app-title span { display: none; }
-            .tab-btn { padding: 6px 8px; font-size: 11px; }
-            .app-header { margin-bottom: 8px; padding-bottom: 8px; }
+        @media(max-width: 600px) { 
+            body { padding: 8px; } 
+            .app-title span { display: none; } 
+            .tab-btn { padding: 6px 8px; font-size: 11px; } 
+            .app-header { margin-bottom: 8px; padding-bottom: 8px; } 
         }
 
         .view-section:not(.active) { display: none !important; }
@@ -65,25 +53,28 @@
         @media(max-width: 850px) { .grid-layout { grid-template-columns: 1fr; } }
 
         .card { background: var(--card-bg); border-radius: var(--radius-lg); padding: 20px; box-shadow: var(--shadow-sm); border: 1px solid var(--border-color); margin-bottom: 15px; }
-        .card h2 { font-size: 15px; font-weight: 700; color: var(--primary-color); margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; letter-spacing: -0.3px;}
+        .card h2 { font-size: 15px; font-weight: 700; color: var(--primary-color); margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; letter-spacing: -0.3px; }
 
-        /* フォーム要素 */
+        /* フォーム */
         .form-row { display: flex; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
         .form-group { flex: 1; min-width: 120px; }
         label { display: block; font-size: 11px; font-weight: 600; margin-bottom: 4px; color: var(--text-muted); }
         input[type="text"], input[type="number"], input[type="date"], select, textarea { width: 100%; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 13px; background-color: var(--bg-color); transition: var(--transition); }
         input:focus, select:focus, textarea:focus { border-color: var(--accent-color); outline: none; background-color: #fff; box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1); }
-        .checkbox-label { display: flex; align-items: center; gap: 6px; font-size: 12px; cursor: pointer; color: var(--danger-color); font-weight: 600; }
         
-        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 16px; border: none; border-radius: var(--radius-sm); font-size: 12px; font-weight: 600; cursor: pointer; transition: var(--transition); text-decoration: none; }
+        .checkbox-label { display: flex; align-items: center; gap: 6px; font-size: 12px; cursor: pointer; font-weight: 600; }
+        .chk-red { color: var(--danger-color); } 
+        .chk-yellow { color: #d97706; }
+        
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 16px; border: none; border-radius: var(--radius-sm); font-size: 12px; font-weight: 600; cursor: pointer; transition: var(--transition); }
         .btn:hover { transform: translateY(-1px); filter: brightness(1.05); box-shadow: var(--shadow-md); }
         .btn:active { transform: translateY(0); box-shadow: none; }
         .btn-sm { padding: 5px 10px; font-size: 11px; }
-        .btn-primary { background-color: var(--primary-color); color: white; }
+        .btn-primary { background-color: var(--primary-color); color: white; } 
         .btn-accent { background-color: var(--accent-color); color: white; }
-        .btn-success { background-color: var(--success-color); color: white; }
+        .btn-success { background-color: var(--success-color); color: white; } 
         .btn-warning { background-color: var(--warning-color); color: white; }
-        .btn-danger { background-color: var(--danger-color); color: white; }
+        .btn-danger { background-color: var(--danger-color); color: white; } 
         .btn-secondary { background-color: var(--text-muted); color: white; }
 
         .drop-zone { border: 2px dashed #cbd5e1; border-radius: var(--radius-md); padding: 15px; text-align: center; background: var(--bg-color); cursor: pointer; font-size: 12px; color: var(--text-muted); transition: var(--transition); }
@@ -92,16 +83,11 @@
 
         .dot-selector { display: flex; gap: 8px; align-items: center; margin-top: 6px; padding: 4px 0; }
         .dot-chip { width: 16px; height: 16px; border-radius: 50%; cursor: pointer; transition: var(--transition); border: 2px solid transparent; position: relative; }
-        .dot-chip:hover { transform: scale(1.15); }
+        .dot-chip:hover { transform: scale(1.15); } 
         .dot-chip.active { border-color: var(--primary-color); box-shadow: 0 0 0 2px #fff inset; }
+        .dc-red { background-color: #ef4444; } .dc-blue { background-color: #3b82f6; } .dc-green { background-color: #10b981; } .dc-yellow { background-color: #f59e0b; } .dc-purple { background-color: #a855f7; }
         
-        .dc-red { background-color: #ef4444; }
-        .dc-blue { background-color: #3b82f6; }
-        .dc-green { background-color: #10b981; }
-        .dc-yellow { background-color: #f59e0b; }
-        .dc-purple { background-color: #a855f7; }
-
-        .micro-dots { display: inline-flex; gap: 3px; align-items: center; margin-left: 6px; vertical-align: middle; }
+        .micro-dots { display: inline-flex; gap: 3px; align-items: center; margin-left: 6px; vertical-align: middle; } 
         .micro-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
 
         /* ギャラリー コントロールバー */
@@ -111,7 +97,7 @@
         
         .toggle-group { display: inline-flex; background: var(--border-light); padding: 4px; border-radius: var(--radius-md); align-items: center; }
         .toggle-btn { padding: 6px 10px; border: none; background: transparent; font-size: 14px; color: var(--text-muted); cursor: pointer; border-radius: var(--radius-sm); transition: var(--transition); }
-        .toggle-btn:hover { color: var(--primary-color); background: rgba(0,0,0,0.05); }
+        .toggle-btn:hover { color: var(--primary-color); background: rgba(0,0,0,0.05); } 
         .toggle-btn.active { background: var(--card-bg); color: var(--accent-color); box-shadow: var(--shadow-sm); transform: scale(1.05); }
         .toggle-divider { width: 1px; height: 16px; background: #cbd5e1; margin: 0 4px; }
 
@@ -122,83 +108,110 @@
         .gallery-img-wrap { width: 100%; background: var(--border-light); display: flex; align-items: center; justify-content: center; overflow: hidden; }
         .gallery-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
         .gallery-card:hover .gallery-img { transform: scale(1.05); }
-        .gallery-info { padding: 10px; display: flex; flex-direction: column; gap: 4px; flex: 1; justify-content: space-between;}
+        .gallery-info { padding: 10px; display: flex; flex-direction: column; gap: 4px; flex: 1; justify-content: space-between; }
         
-        .mode-grid-lg { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
-        .mode-grid-lg .gallery-img-wrap { height: 220px; }
+        /* ビューモード切り替え */
+        .mode-grid-lg { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; } 
+        .mode-grid-lg .gallery-img-wrap { height: 220px; } 
         .mode-grid-lg .gallery-title { font-size: 13px; font-weight: 700; color: var(--primary-color); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4; }
         
-        .mode-grid-md { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 15px; }
-        .mode-grid-md .gallery-img-wrap { height: 140px; }
+        .mode-grid-md { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 15px; } 
+        .mode-grid-md .gallery-img-wrap { height: 140px; } 
         .mode-grid-md .gallery-title { font-size: 11px; font-weight: bold; color: var(--primary-color); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.3; }
-
-        .mode-grid-sm { grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 8px; }
-        @media(max-width: 400px) { .mode-grid-sm { grid-template-columns: repeat(auto-fill, minmax(65px, 1fr)); } }
-        .mode-grid-sm .gallery-img-wrap { height: 80px; }
-        .mode-grid-sm .gallery-info { padding: 6px; }
-        .mode-grid-sm .gallery-title { font-size: 9px; font-weight: bold; color: var(--primary-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        
+        .mode-grid-sm { grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 8px; } 
+        @media(max-width: 400px) { .mode-grid-sm { grid-template-columns: repeat(auto-fill, minmax(65px, 1fr)); } } 
+        .mode-grid-sm .gallery-img-wrap { height: 80px; } 
+        .mode-grid-sm .gallery-info { padding: 6px; } 
+        .mode-grid-sm .gallery-title { font-size: 9px; font-weight: bold; color: var(--primary-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } 
         .mode-grid-sm .platform-badge { display: none; }
-
-        .mode-list-rich { display: flex; flex-direction: column; gap: 12px; }
-        .list-card-rich { display: flex; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius-md); overflow: hidden; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
-        .list-card-rich:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); }
-        .list-card-img-wrap { width: 130px; min-height: 130px; flex-shrink: 0; background: var(--border-light); overflow: hidden; display: flex; }
-        .list-card-img-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
-        .list-card-rich:hover .list-card-img-wrap img { transform: scale(1.05); }
-        @media(max-width: 500px) { .list-card-img-wrap { width: 90px; min-height: 90px; } }
-        .list-card-content { padding: 12px 16px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; min-width: 0; }
-        .list-card-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 6px; }
-        .list-card-title { font-size: 15px; font-weight: 700; color: var(--primary-color); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.3; }
-        .list-card-meta { font-size: 11px; color: var(--text-muted); margin-bottom: 8px; display: flex; flex-wrap: wrap; gap: 4px 12px; }
-        .list-card-meta span { display: flex; align-items: center; gap: 4px; }
+        
+        .mode-list-rich { display: flex; flex-direction: column; gap: 12px; } 
+        .list-card-rich { display: flex; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius-md); overflow: hidden; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; } 
+        .list-card-rich:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); } 
+        .list-card-img-wrap { width: 130px; min-height: 130px; flex-shrink: 0; background: var(--border-light); overflow: hidden; display: flex; } 
+        .list-card-img-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; } 
+        .list-card-rich:hover .list-card-img-wrap img { transform: scale(1.05); } 
+        @media(max-width: 500px) { .list-card-img-wrap { width: 90px; min-height: 90px; } } 
+        .list-card-content { padding: 12px 16px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; min-width: 0; } 
+        .list-card-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 6px; } 
+        .list-card-title { font-size: 15px; font-weight: 700; color: var(--primary-color); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.3; } 
+        .list-card-meta { font-size: 11px; color: var(--text-muted); margin-bottom: 8px; display: flex; flex-wrap: wrap; gap: 4px 12px; } 
+        .list-card-meta span { display: flex; align-items: center; gap: 4px; } 
         .list-card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: auto; border-top: 1px dashed var(--border-color); padding-top: 8px; }
 
+        /* テーブル共通 */
         .table-responsive { overflow-x: auto; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: #fff; box-shadow: var(--shadow-sm); }
-        .table-responsive.mode-list-compact { max-height: none; }
+        .table-responsive.mode-list-compact { max-height: none; } 
         .table-responsive:not(.mode-list-compact) { max-height: 500px; }
-        
-        table { width: 100%; border-collapse: collapse; font-size: 11px; }
-        th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border-light); white-space: nowrap; vertical-align: middle; }
-        td.wrap-text { white-space: normal; min-width: 120px; line-height: 1.4; }
-        th { background-color: var(--bg-color); color: var(--text-muted); font-weight: 700; position: sticky; top: 0; z-index: 10; text-transform: uppercase; font-size: 10px; letter-spacing: 0.5px; border-bottom: 2px solid var(--border-color); }
+        table { width: 100%; border-collapse: collapse; font-size: 11px; } 
+        th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border-light); white-space: nowrap; vertical-align: middle; } 
+        td.wrap-text { white-space: normal; min-width: 120px; line-height: 1.4; } 
+        th { background-color: var(--bg-color); color: var(--text-muted); font-weight: 700; position: sticky; top: 0; z-index: 10; text-transform: uppercase; font-size: 10px; letter-spacing: 0.5px; border-bottom: 2px solid var(--border-color); } 
         tr:hover td { background-color: rgba(241, 245, 249, 0.5); }
         
         .img-preview { width: 38px; height: 38px; object-fit: cover; border-radius: 4px; border: 1px solid var(--border-light); display: block; }
-        
-        .rank-star { color: #f59e0b; font-size: 13px; letter-spacing: 1px;}
+        .rank-star { color: #f59e0b; font-size: 13px; letter-spacing: 1px;} 
         .platform-badge { color: white; padding: 3px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; box-shadow: 0 1px 2px rgba(0,0,0,0.1); white-space: nowrap; }
 
-        /* モーダル */
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.85); align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+        /* 分析ビュー */
+        .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .summary-box { background: var(--bg-color); padding: 15px; border-radius: var(--radius-md); border: 1px solid var(--border-color); display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+        .summary-box .lbl { font-size: 11px; color: var(--text-muted); font-weight: 700; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .summary-box .val { font-size: 22px; font-weight: 800; color: var(--primary-color); } 
+        .summary-box .sub { font-size: 11px; color: var(--success-color); margin-top: 4px; font-weight: 600; }
+        @media(max-width: 650px) { 
+            .summary-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; } 
+            .summary-box { padding: 12px 8px; } 
+            .summary-box .lbl { font-size: 10px; } 
+            .summary-box .val { font-size: 17px !important; } 
+            .summary-box .sub { font-size: 10px; } 
+        }
+        
+        .analytics-table-container { margin-top: 20px; border-top: 1px dashed var(--border-color); padding-top: 15px; }
+        .analytics-list-item { display: flex; justify-content: space-between; padding: 10px 12px; border-bottom: 1px solid var(--border-light); font-size: 13px; transition: var(--transition); cursor: pointer; }
+        .analytics-list-item:hover { background: #f0f9ff; }
+        .analytics-list-item:last-child { border-bottom: none; }
+        .analytics-list-item strong { color: var(--primary-color); pointer-events: none; }
+        
+        /* モーダル群 */
+        .modal { display: none; position: fixed; left: 0; top: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.85); align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+        #detail-modal { z-index: 1100; } 
+        #analytics-detail-modal { z-index: 1050; }
         .modal-content { background: #fff; border-radius: var(--radius-lg); width: 95%; max-width: 750px; max-height: 90vh; overflow-y: auto; display: flex; flex-direction: column; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); animation: scaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
         @keyframes scaleUp { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        
         .modal-header { padding: 16px 20px; color: white; display: flex; justify-content: space-between; align-items: center; background-color: var(--primary-color); }
-        .modal-close { background: none; border: none; color: white; font-size: 24px; cursor: pointer; transition: 0.2s; opacity: 0.8;}
+        .modal-close { background: none; border: none; color: white; font-size: 24px; cursor: pointer; transition: 0.2s; opacity: 0.8;} 
         .modal-close:hover { opacity: 1; transform: scale(1.1); }
         .modal-body { padding: 20px; display: flex; gap: 24px; flex-wrap: wrap; }
-        .modal-img-col { flex: 1; min-width: 220px; display: flex; flex-direction: column; gap: 12px; }
+        
+        .modal-img-col { flex: 1; min-width: 220px; display: flex; flex-direction: column; gap: 12px; } 
         .modal-img { width: 100%; aspect-ratio: 1/1; object-fit: contain; background: var(--bg-color); border-radius: var(--radius-md); border: 1px solid var(--border-color); padding: 10px;}
-        .modal-info-col { flex: 2; min-width: 250px; }
-        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;}
+        .modal-info-col { flex: 2; min-width: 250px; } 
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;} 
         .info-box { background: var(--bg-color); padding: 10px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); }
-        .info-label { font-size: 10px; color: var(--text-muted); font-weight: 700; margin-bottom: 4px; text-transform: uppercase; }
+        .info-label { font-size: 10px; color: var(--text-muted); font-weight: 700; margin-bottom: 4px; text-transform: uppercase; } 
         .info-val { font-size: 13px; font-weight: 600; color: var(--primary-color); word-break: break-all; white-space: pre-wrap;}
-        #interactive { width: 100%; border-radius: var(--radius-md); display: none; background: #000; overflow: hidden; margin-bottom: 10px; }
+        
+        #interactive { width: 100%; border-radius: var(--radius-md); display: none; background: #000; overflow: hidden; margin-bottom: 10px; } 
         #interactive video { width: 100%; height: auto; display: block; }
         
-        #diff-modal .table-responsive { border: 1px solid var(--border-color); }
-        #diff-modal th { font-size: 11px; }
-        #diff-modal td { font-size: 12px; }
+        #diff-modal .table-responsive, #analytics-detail-modal .table-responsive { border: 1px solid var(--border-color); }
+        #diff-modal th, #analytics-detail-modal th { font-size: 11px; }
+        #diff-modal td, #analytics-detail-modal td { font-size: 12px; }
     </style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script></head>
+    
+    <script src="./quagga.min.js"></script>
+    <script src="./chart.js"></script>
+</head>
 <body>
 <div id="startup-modal" class="modal" style="display:flex; z-index: 9999;">
     <div class="modal-content" style="max-width: 480px; text-align: center; padding: 40px 30px;">
         <h2 style="color: var(--primary-color); margin-bottom: 20px; font-size: 20px;">🎮 bit log へようこそ</h2>
         <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 30px; line-height: 1.6; text-align: left;">
             ブラウザで動くデータベースツールです。<br>
-            <strong>以前のデータを続けて編集する場合は、まず保存済みのDB(JSON)ファイルを選択してください。</strong><br>
-            <span style="font-size: 12px; color: var(--danger-color); display: block; margin-top: 10px; padding: 10px; background: #fee2e2; border-radius: 6px;">※接続前に入力したデータは、接続時に差分として自動的に結合されますが、起動時にまずファイルを読み込むことを推奨します。</span>
+            <strong>以前のデータを続けて編集する場合は、まず保存済みのDB(JSON)ファイルを選択してください。</strong>
         </p>
         <div style="display: flex; gap: 12px; flex-direction: column;">
             <button class="btn btn-primary" style="padding: 16px; font-size: 15px; border-radius: var(--radius-md);" onclick="startupLoad()">📁 保存済みのDBファイルを開く (推奨)</button>
@@ -210,13 +223,14 @@
 <div class="container">
     <header class="app-header">
         <div class="app-title-area" onclick="switchTab('settings-view')" title="接続設定へ">
-            <h1 class="app-title">bit log <span>v29</span></h1>
+            <h1 class="app-title">bit log <span>v34</span></h1>
             <span id="sync-dot" class="sync-dot" title="切断状態"></span>
         </div>
         <div class="header-controls">
             <nav class="tab-nav">
                 <button class="tab-btn active" onclick="switchTab('editor-view')">📝 登録</button>
                 <button class="tab-btn" onclick="switchTab('gallery-view')">🖼️ データ</button>
+                <button class="tab-btn" onclick="switchTab('analytics-view')">📈 分析</button>
                 <button class="tab-btn" onclick="switchTab('settings-view')">⚙️ 設定</button>
             </nav>
         </div>
@@ -226,25 +240,65 @@
         <div class="card">
             <h2>
                 🎮 ゲーム登録 <span id="form-mode" style="font-size:12px; color:var(--accent-color); font-weight:normal;">[新規登録]</span>
-                <label class="checkbox-label"><input type="checkbox" id="game-lock"> 🔒 AI更新保護</label>
+                <div style="display:flex; gap:12px; font-size:12px;">
+                    <label class="checkbox-label chk-yellow"><input type="checkbox" id="game-exclude-analytics"> 📊 分析除外(未所持等)</label>
+                    <label class="checkbox-label chk-red"><input type="checkbox" id="game-lock"> 🔒 AI保護</label>
+                </div>
             </h2>
             <form id="game-form">
                 <div class="form-row">
-                    <div class="form-group" style="flex:2;"><label>タイトル</label><input type="text" id="game-title" placeholder="未入力可（JANからAIが補完）"></div>
+                    <div class="form-group" style="flex:2;">
+                        <label>タイトル</label>
+                        <input type="text" id="game-title" placeholder="未入力可（JANからAIが補完）">
+                    </div>
                     <div class="form-group" style="flex:1;">
                         <label>対応ハード</label>
                         <select id="game-platform">
                             <optgroup label="任天堂">
-                                <option value="Nintendo Switch">Switch</option> <option value="Wii U">Wii U</option> <option value="Wii">Wii</option> <option value="ゲームキューブ">ゲームキューブ</option> <option value="ニンテンドー64">ニンテンドー64</option> <option value="スーパーファミコン">スーパーファミコン</option> <option value="ファミコン">ファミコン</option> <option value="ディスクシステム">ディスクシステム</option> <option value="ニンテンドー3DS">3DS</option> <option value="ニンテンドーDS">DS</option> <option value="ゲームボーイアドバンス">GBA</option> <option value="ゲームボーイカラー">ゲームボーイカラー</option> <option value="ゲームボーイ">ゲームボーイ</option>
+                                <option value="Nintendo Switch 2">Switch 2</option>
+                                <option value="Nintendo Switch">Switch</option>
+                                <option value="Wii U">Wii U</option>
+                                <option value="Wii">Wii</option>
+                                <option value="ゲームキューブ">ゲームキューブ</option>
+                                <option value="ニンテンドー64">ニンテンドー64</option>
+                                <option value="スーパーファミコン">スーパーファミコン</option>
+                                <option value="ファミコン">ファミコン</option>
+                                <option value="ディスクシステム">ディスクシステム</option>
+                                <option value="ニンテンドー3DS">3DS</option>
+                                <option value="ニンテンドーDS">DS</option>
+                                <option value="ゲームボーイアドバンス">GBA</option>
+                                <option value="ゲームボーイカラー">ゲームボーイカラー</option>
+                                <option value="ゲームボーイ">ゲームボーイ</option>
                             </optgroup>
                             <optgroup label="PlayStation">
-                                <option value="PS5">PS5</option> <option value="PS4">PS4</option> <option value="PS3">PS3</option> <option value="PS2">PS2</option> <option value="PS1">PS1</option> <option value="PS Vita">PS Vita</option> <option value="PSP">PSP</option>
+                                <option value="PS5">PS5</option>
+                                <option value="PS4">PS4</option>
+                                <option value="PS3">PS3</option>
+                                <option value="PS2">PS2</option>
+                                <option value="PS1">PS1</option>
+                                <option value="PS Vita">PS Vita</option>
+                                <option value="PSP">PSP</option>
                             </optgroup>
                             <optgroup label="セガ / NEC / その他">
-                                <option value="ドリームキャスト">ドリームキャスト</option> <option value="セガサターン">セガサターン</option> <option value="メガドライブ">メガドライブ</option> <option value="ゲームギア">ゲームギア</option> <option value="PCエンジン">PCエンジン</option> <option value="PCエンジンCD-ROM2">PCエンジンCD-ROM2</option> <option value="ネオジオ">ネオジオ</option> <option value="ネオジオCD">ネオジオCD</option> <option value="ワンダースワン">ワンダースワン</option> <option value="ワンダースワンカラー">ワンダースワンカラー</option>
+                                <option value="ドリームキャスト">ドリームキャスト</option>
+                                <option value="セガサターン">セガサターン</option>
+                                <option value="メガドライブ">メガドライブ</option>
+                                <option value="ゲームギア">ゲームギア</option>
+                                <option value="PCエンジン">PCエンジン</option>
+                                <option value="PCエンジンCD-ROM2">PCエンジンCD-ROM2</option>
+                                <option value="ネオジオ">ネオジオ</option>
+                                <option value="ネオジオCD">ネオジオCD</option>
+                                <option value="ワンダースワン">ワンダースワン</option>
+                                <option value="ワンダースワンカラー">ワンダースワンカラー</option>
                             </optgroup>
-                            <optgroup label="Xbox / PC / その他">
-                                <option value="Xbox Series X/S">Xbox Series X/S</option> <option value="Xbox One">Xbox One</option> <option value="Xbox 360">Xbox 360</option> <option value="Xbox">Xbox</option> <option value="PC">PC (Steam等)</option> <option value="アーケード">アーケード基板</option> <option value="その他">その他</option>
+                            <optgroup label="Xbox / PC / カスタム">
+                                <option value="Xbox Series X/S">Xbox Series X/S</option>
+                                <option value="Xbox One">Xbox One</option>
+                                <option value="Xbox 360">Xbox 360</option>
+                                <option value="Xbox">Xbox</option>
+                                <option value="PC">PC (Steam等)</option>
+                                <option value="アーケード">アーケード基板</option> 
+                                <option value="その他" style="font-weight:bold; color:var(--accent-color);">✎ その他 (自由入力)</option>
                             </optgroup>
                         </select>
                     </div>
@@ -253,14 +307,25 @@
                 <div class="form-row">
                     <div class="form-group" style="flex:1;">
                         <label>JANコード</label>
-                        <div style="display:flex; gap:6px;"><input type="text" id="game-jan"><button type="button" class="btn btn-primary btn-sm" id="btn-toggle-scan">📷</button></div>
+                        <div style="display:flex; gap:6px;">
+                            <input type="text" id="game-jan">
+                            <button type="button" class="btn btn-primary btn-sm" id="btn-toggle-scan">📷</button>
+                        </div>
                     </div>
-                    <div class="form-group" style="flex:1;"><label>シリーズ</label><input type="text" id="game-series"></div>
+                    <div class="form-group" style="flex:1;">
+                        <label>シリーズ</label>
+                        <input type="text" id="game-series">
+                    </div>
                 </div>
+                
                 <div id="interactive"></div>
 
                 <div class="form-row">
                     <div class="form-group"><label>ジャンル</label><input type="text" id="game-genre"></div>
+                    <div class="form-group"><label>対応周辺機器 (カンマ区切り)</label><input type="text" id="game-peripherals" placeholder="例: amiibo, プロコン, マイク"></div>
+                </div>
+                
+                <div class="form-row">
                     <div class="form-group"><label>販売 (Publisher)</label><input type="text" id="game-publisher"></div>
                     <div class="form-group"><label>開発 (Developer)</label><input type="text" id="game-developer"></div>
                 </div>
@@ -268,7 +333,6 @@
                 <div class="form-row">
                     <div class="form-group"><label>発売日</label><input type="date" id="game-release"></div>
                     <div class="form-group"><label>型番</label><input type="text" id="game-model"></div>
-                    
                     <div class="form-group" style="min-width: 150px;">
                         <label>シークレット印 <span style="font-size:10px; font-weight:normal; color:var(--text-muted);">(複数可)</span></label>
                         <div class="dot-selector" id="game-dot-selector">
@@ -284,9 +348,20 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label>評価</label>
-                        <select id="game-rating"><option value="">未評価</option><option value="5">★★★★★</option><option value="4">★★★★☆</option><option value="3">★★★☆☆</option><option value="2">★★☆☆☆</option><option value="1">★☆☆☆☆</option></select>
+                        <select id="game-rating">
+                            <option value="">未評価</option>
+                            <option value="5">★★★★★</option>
+                            <option value="4">★★★★☆</option>
+                            <option value="3">★★★☆☆</option>
+                            <option value="2">★★☆☆☆</option>
+                            <option value="1">★☆☆☆☆</option>
+                        </select>
                     </div>
                     <div class="form-group"><label>定価(税込)</label><input type="text" id="game-price" placeholder="例: 5800"></div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group"><label>購入日</label><input type="date" id="user-buy-date"></div>
                     <div class="form-group"><label>購入店</label><input type="text" id="user-shop"></div>
                     <div class="form-group"><label>購入価格</label><input type="text" id="user-buy-price" placeholder="例: 1000"></div>
                 </div>
@@ -302,7 +377,10 @@
                     <div id="drop-zone" class="drop-zone">画像をドロップ、またはクリック<input type="file" id="manual-file-input" accept="image/*" style="display:none;"></div>
                 </div>
 
-                <div class="form-group" style="margin-bottom:15px;"><label>📝 レビュー / メモ</label><textarea id="game-review" rows="2"></textarea></div>
+                <div class="form-group" style="margin-bottom:15px;">
+                    <label>📝 レビュー / メモ</label>
+                    <textarea id="game-review" rows="2"></textarea>
+                </div>
                 
                 <div style="display:flex; gap:10px;">
                     <button type="submit" class="btn btn-success" style="flex:3; padding:10px;" id="btn-submit">💾 登録 (自動保存)</button>
@@ -316,7 +394,9 @@
             <input type="text" id="table-search" placeholder="タイトル等で絞り込み..." oninput="renderEditorList()" style="margin-bottom:12px; background:#fff;">
             <div class="table-responsive">
                 <table>
-                    <thead><tr><th>画像</th><th>タイトル / シリーズ</th><th>機種</th><th>ジャンル</th><th>販売 / 開発</th><th>操作</th></tr></thead>
+                    <thead>
+                        <tr><th>画像</th><th>タイトル / シリーズ</th><th>機種</th><th>ジャンル / 周辺機器</th><th>操作</th></tr>
+                    </thead>
                     <tbody id="editor-table-body"></tbody>
                 </table>
             </div>
@@ -326,8 +406,12 @@
     <main id="gallery-view" class="view-section">
         <div class="controls-bar">
             <div class="filter-group">
-                <select id="gallery-filter-platform" onchange="renderGallery()"><option value="ALL">全ハード</option></select>
-                <select id="gallery-filter-genre" onchange="renderGallery()"><option value="ALL">全ジャンル</option></select>
+                <select id="gallery-filter-platform" onchange="renderGallery()">
+                    <option value="ALL">全ハード</option>
+                </select>
+                <select id="gallery-filter-genre" onchange="renderGallery()">
+                    <option value="ALL">全ジャンル</option>
+                </select>
                 <select id="gallery-filter-dot" onchange="renderGallery()" style="max-width:90px;">
                     <option value="ALL">印：すべて</option>
                     <option value="red">🔴 赤印</option>
@@ -337,12 +421,12 @@
                     <option value="purple">🟣 紫印</option>
                 </select>
                 <select id="gallery-sort" onchange="renderGallery()">
-                    <option value="default">登録順</option> 
-                    <option value="title">タイトル順</option> 
-                    <option value="release-desc">発売日が新しい順</option> 
-                    <option value="release-asc">発売日が古い順</option> 
-                    <option value="price">定価が高い順</option> 
-                    <option value="rating">評価順</option> 
+                    <option value="default">登録順</option>
+                    <option value="title">タイトル順</option>
+                    <option value="release-desc">発売日が新しい順</option>
+                    <option value="release-asc">発売日が古い順</option>
+                    <option value="price">定価が高い順</option>
+                    <option value="rating">評価順</option>
                     <option value="platform">機種別</option>
                 </select>
                 <input type="text" id="gallery-search" placeholder="検索..." oninput="renderGallery()" style="width:140px;">
@@ -358,15 +442,60 @@
                 <button class="toggle-btn" id="btn-view-list-compact" onclick="changeViewMode('list-compact')" title="リスト（コンパクト）： テーブル">📋</button>
             </div>
         </div>
-        
         <div id="gallery-render-area"></div>
     </main>
 
+    <main id="analytics-view" class="view-section">
+        <div class="card" style="background: linear-gradient(to right, #f8fafc, #eff6ff); border-color: var(--accent-color);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px; border-bottom: 1px dashed var(--border-color); padding-bottom: 10px; flex-wrap: wrap; gap: 8px;">
+                <h2 style="margin:0; border:none; padding:0;">📊 サマリーダッシュボード</h2>
+                <label class="checkbox-label" style="font-size:11px; background:var(--border-light); padding:6px 10px; border-radius:6px; margin:0;">
+                    <input type="checkbox" id="analytics-include-excluded" onchange="renderAnalyticsSummary(); renderAnalyticsChart();"> 📊 分析除外(未所持等)のデータも含めて分析する
+                </label>
+            </div>
+            <div class="summary-grid" id="analytics-summary"></div>
+        </div>
+
+        <div class="card">
+            <h2>📈 詳細グラフィカル分析</h2>
+            <div class="controls-bar" style="margin-bottom: 15px; background: var(--bg-color);">
+                <div class="filter-group">
+                    <span style="font-size: 12px; font-weight: bold; color: var(--text-muted);">分析軸：</span>
+                    <select id="analytics-axis" onchange="renderAnalyticsChart()">
+                        <option value="platform">ハード（機種）別</option>
+                        <option value="genre">ジャンル別</option>
+                        <option value="peripherals">周辺機器別</option>
+                        <option value="dots">シークレット印別</option>
+                        <option value="publisher">メーカー（販売）別</option>
+                        <option value="buyYear">購入年別</option>
+                        <option value="buyMonth">購入年月別</option>
+                        <option value="releaseYear">発売年別</option>
+                        <option value="priceRange">定価価格帯別</option>
+                        <option value="rating">評価（積みゲー）別</option>
+                    </select>
+                    
+                    <span style="font-size: 12px; font-weight: bold; color: var(--text-muted); margin-left: 10px;">グラフ：</span>
+                    <select id="analytics-type" onchange="renderAnalyticsChart()">
+                        <option value="doughnut">円グラフ（割合）</option>
+                        <option value="bar">棒グラフ（比較）</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div style="position: relative; height:45vh; width:100%; min-height: 300px;">
+                <canvas id="analytics-chart"></canvas>
+            </div>
+            
+            <div class="analytics-table-container">
+                <h3 style="font-size: 13px; color: var(--primary-color); margin-bottom: 10px;">📝 分析結果リスト（タップで詳細な内訳を表示）</h3>
+                <div id="analytics-text-result"></div>
+            </div>
+        </div>
+    </main>
+
     <main id="settings-view" class="view-section">
-        
         <div class="card">
             <h2>⚙️ 表示設定の保存と読み込み (JSON)</h2>
-            <p style="font-size:12px; color:var(--text-muted); margin-bottom:12px;">キャッシュクリア対策のため、起動時のデフォルト表示設定は「設定専用のJSONファイル」として出力・読み込みが可能です。</p>
             <div class="form-row">
                 <div class="form-group">
                     <label>起動時のデフォルト表示モード</label>
@@ -391,7 +520,6 @@
                     </select>
                 </div>
             </div>
-            
             <div style="display: flex; gap: 10px; margin-top: 15px; border-top: 1px dashed var(--border-color); padding-top: 15px;">
                 <button class="btn btn-primary btn-sm" onclick="exportSettings()">💾 現在の設定をJSONで保存</button>
                 <button class="btn btn-success btn-sm" onclick="document.getElementById('settings-file-input').click()">📥 設定用JSONを読み込む</button>
@@ -399,21 +527,38 @@
             </div>
         </div>
 
-        <div class="card" style="border-color: var(--accent-color); background: linear-gradient(to bottom right, #ffffff, #f0f9ff);">
+        <div class="card" style="border-color: var(--accent-color);">
             <h2>📁 データベース本体ファイル接続</h2>
-            <p style="font-size:12px; color:var(--text-muted); margin-bottom:12px;">
-                ゲーム情報の入ったローカルのJSONデータファイルと直接同期します。起動時、またはファイルを切り替える場合に使用します。
-            </p>
             <button class="btn btn-accent" onclick="startJSONFileSync()" style="padding:10px 20px; font-size:13px;">
                 <span id="settings-sync-dot" class="sync-dot" style="margin-right:6px;"></span> 📁 DBファイルを選択・新規接続
             </button>
         </div>
 
         <div class="card">
-            <h2>🤖 AIによるデータ一括自動補完・修正 <span style="font-size:11px; font-weight:normal; color:#d97706; background:#fef3c7; padding:2px 6px; border-radius:4px;">※強化版</span></h2>
-            <p style="font-size:12px; color:var(--text-muted); margin-bottom:12px;">「🔒 AI更新保護」にチェックを入れたゲームは除外されます。</p>
+            <h2>🤖 AIによるデータ一括自動補完・修正</h2>
+            <p style="font-size:12px; color:var(--text-muted); margin-bottom:12px;">データ量が多すぎるとAIが処理を飛ばすため、未入力のデータのみを抽出し、30件ずつに分割して送信します。</p>
+            
+            <div style="background:var(--border-light); padding:10px; border-radius:var(--radius-sm); margin-bottom:12px;">
+                <div class="form-row" style="margin-bottom:0;">
+                    <div class="form-group">
+                        <label>🎯 対象データ</label>
+                        <select id="ai-target-type" onchange="updatePromptPreview()">
+                            <option value="missing">未補完のデータのみ抽出 (推奨)</option>
+                            <option value="all">保護なし全件 (非推奨)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>✂️ 分割送信 (1回30件まで)</label>
+                        <select id="ai-target-batch" onchange="updatePromptPreview(true)"></select>
+                    </div>
+                </div>
+            </div>
+
             <button class="btn btn-accent btn-sm" onclick="copyPrompt()">📋 1. AIへの指示書をコピーする</button>
-            <div style="margin-top:12px;"><textarea id="prompt-preview" rows="5" style="font-family:monospace; font-size:11px; background:#0f172a; color:#38bdf8; padding:12px; border-radius:var(--radius-sm);" readonly></textarea></div>
+            <div style="margin-top:12px;">
+                <textarea id="prompt-preview" rows="6" style="font-family:monospace; font-size:11px; background:#0f172a; color:#38bdf8; padding:12px; border-radius:var(--radius-sm);" readonly></textarea>
+            </div>
+            
             <div style="margin-top:20px; border-top: 1px dashed var(--border-color); padding-top:15px;">
                 <label style="font-weight:bold; color:var(--success-color); font-size:12px; display:block; margin-bottom:8px;">📥 2. AIの返答(JSON)をここに貼り付けて統合</label>
                 <textarea id="ai-json-input" rows="4" placeholder="AIが返ってきたテキストをそのまま貼り付けてください"></textarea>
@@ -423,7 +568,6 @@
 
         <div class="card">
             <h2>📦 データ入出力 ＆ 保存先の自由指定</h2>
-            <p style="font-size:12px; color:var(--text-muted); margin-bottom:15px;">ボタンを押すと「名前を付けて保存」画面が開きます。</p>
             <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; border-bottom: 1px solid var(--border-light); padding-bottom: 20px;">
                 <button class="btn btn-primary btn-sm" onclick="exportToJSON()">📦 DBを手動でJSON保存</button>
                 <button class="btn btn-warning btn-sm" onclick="exportToAI_CSV()">🤖 AI用軽量CSV保存</button>
@@ -447,7 +591,7 @@
     <div class="modal-content">
         <div class="modal-header">
             <h3 id="modal-header-title" style="font-size:16px; margin:0; font-weight:700; display:flex; align-items:center; gap:8px;">
-                ゲーム詳細 <span id="view-title-dots"></span> <span id="view-lock-status" style="font-size:11px; color:#fca5a5;"></span>
+                ゲーム詳細 <span id="view-title-dots"></span> <span id="view-lock-status" style="font-size:11px; color:#fca5a5;"></span><span id="view-exclude-status" style="font-size:11px; color:#fde047;"></span>
             </h3>
             <button class="modal-close" onclick="closeModal()">&times;</button>
         </div>
@@ -462,6 +606,7 @@
                     <div class="info-box"><div class="info-label">シリーズ</div><div class="info-val" id="view-series">-</div></div>
                     <div class="info-box"><div class="info-label">ハード</div><div class="info-val" id="view-platform">-</div></div>
                     <div class="info-box"><div class="info-label">ジャンル</div><div class="info-val" id="view-genre">-</div></div>
+                    <div class="info-box"><div class="info-label">対応周辺機器</div><div class="info-val" id="view-peripherals">-</div></div>
                     <div class="info-box"><div class="info-label">評価</div><div class="info-val rank-star" id="view-rating" style="font-size:15px;">-</div></div>
                     <div class="info-box"><div class="info-label">発売日</div><div class="info-val" id="view-release">-</div></div>
                     <div class="info-box"><div class="info-label">定価</div><div class="info-val" id="view-price">-</div></div>
@@ -469,10 +614,32 @@
                     <div class="info-box"><div class="info-label">開発 (Developer)</div><div class="info-val" id="view-developer">-</div></div>
                     <div class="info-box"><div class="info-label">型番</div><div class="info-val" id="view-model">-</div></div>
                     <div class="info-box"><div class="info-label">JANコード</div><div class="info-val" id="view-jan">-</div></div>
+                    <div class="info-box"><div class="info-label">購入日</div><div class="info-val" id="view-buyDate">-</div></div>
                     <div class="info-box"><div class="info-label">購入店</div><div class="info-val" id="view-shop">-</div></div>
                     <div class="info-box"><div class="info-label">購入価格</div><div class="info-val" id="view-buyPrice">-</div></div>
                     <div class="info-box" style="grid-column: span 2; background:#f8fafc;"><div class="info-label">レビュー / メモ</div><div class="info-val" id="view-review" style="font-weight:400; line-height:1.6;">-</div></div>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="analytics-detail-modal" class="modal">
+    <div class="modal-content" style="max-width: 650px;">
+        <div class="modal-header" style="background:var(--accent-color);">
+            <h3 style="margin:0; font-size:16px;">🔍 分析内訳: <span id="analytics-detail-title"></span></h3>
+            <button class="modal-close" onclick="closeAnalyticsDetailModal()">&times;</button>
+        </div>
+        <div class="modal-body" style="flex-direction: column;">
+            <p style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">※リストをタップするとソフトの詳細画面を開きます</p>
+            <div class="table-responsive" style="max-height: 60vh;">
+                <table>
+                    <thead><tr><th>画像</th><th>タイトル</th><th>機種 / その他情報</th></tr></thead>
+                    <tbody id="analytics-detail-table-body"></tbody>
+                </table>
+            </div>
+            <div style="margin-top:15px; text-align:right;">
+                <button class="btn btn-secondary" onclick="closeAnalyticsDetailModal()">閉じる</button>
             </div>
         </div>
     </div>
@@ -485,16 +652,12 @@
             <button class="modal-close" onclick="closeDiffModal()">&times;</button>
         </div>
         <div class="modal-body" style="flex-direction: column;">
-            <p style="font-size: 12px; margin-bottom: 12px; color: var(--text-muted);">適用する項目にチェックを入れてください。間違っている内容はチェックを外せば更新されません。</p>
             <div class="table-responsive" style="max-height: 50vh;">
                 <table>
                     <thead>
                         <tr>
                             <th style="width:40px; text-align:center;"><input type="checkbox" id="diff-check-all" checked onchange="toggleAllDiffs(this)"></th>
-                            <th>ゲーム名</th>
-                            <th>項目</th>
-                            <th>変更前</th>
-                            <th>変更後 (AI提案)</th>
+                            <th>ゲーム名</th><th>項目</th><th>変更前</th><th>変更後 (AI提案)</th>
                         </tr>
                     </thead>
                     <tbody id="diff-table-body"></tbody>
@@ -509,65 +672,65 @@
 </div>
 
 <script>
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(err => console.error(err)); });
+    // PWA Service Worker 登録
+    if ('serviceWorker' in navigator) { 
+        window.addEventListener('load', () => { 
+            navigator.serviceWorker.register('sw.js').catch(err => console.error('SW Error:', err)); 
+        }); 
     }
 
-    let gameList = []; let editIndex = -1; let jsonFileHandle = null; 
+    // グローバル変数群
+    let gameList = []; 
+    let editIndex = -1; 
+    let jsonFileHandle = null; 
     let currentViewMode = 'grid-md'; 
+    let appSettings = { viewMode: 'grid-md', defaultSort: 'default' };
+    let globalOthersData = []; 
 
-    // --- 端末固有設定の管理 (LocalStorageを廃止し、JSONファイル入出力化) ---
-    let appSettings = {
-        viewMode: 'grid-md',
-        defaultSort: 'default'
-    };
-
-    function exportSettings() {
-        const data = JSON.stringify(appSettings, null, 2);
-        saveTextToFile(data, `bitlog_settings.json`, { desc: 'JSON Settings', accept: {'application/json': ['.json']}, mime: 'application/json' });
+    // 設定ファイル管理
+    function exportSettings() { 
+        saveTextToFile(JSON.stringify(appSettings, null, 2), `bitlog_settings.json`, { desc: 'JSON', accept: {'application/json': ['.json']}, mime: 'application/json' }); 
     }
-
+    
     function importSettings(event) {
         const file = event.target.files[0]; 
-        if (!file) return;
+        if (!file) return; 
+        
         const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                const imported = JSON.parse(e.target.result);
-                appSettings.viewMode = imported.viewMode || 'grid-md';
-                appSettings.defaultSort = imported.defaultSort || 'default';
-                applySettingsToUI();
-                alert("✅ 設定用JSONを読み込み、適用しました！");
-            } catch(err) {
-                alert("設定ファイルの読み込みに失敗しました。形式が正しいか確認してください。");
-            }
-            event.target.value = ''; // リセット
+        reader.onload = function(e) { 
+            try { 
+                const imported = JSON.parse(e.target.result); 
+                appSettings.viewMode = imported.viewMode || 'grid-md'; 
+                appSettings.defaultSort = imported.defaultSort || 'default'; 
+                applySettingsToUI(); 
+                alert("✅ 適用しました！"); 
+            } catch(err) { 
+                alert("ファイルの解析エラーです。正しいJSONファイルを選択してください。"); 
+            } 
+            event.target.value = ''; 
         };
         reader.readAsText(file, 'UTF-8');
     }
 
-    // JSONロード時などにUIへ設定を反映させる
-    function applySettingsToUI() {
-        document.getElementById('setting-view-mode').value = appSettings.viewMode;
-        document.getElementById('setting-default-sort').value = appSettings.defaultSort;
-        document.getElementById('gallery-sort').value = appSettings.defaultSort;
-        changeViewMode(appSettings.viewMode, false);
+    function applySettingsToUI() { 
+        document.getElementById('setting-view-mode').value = appSettings.viewMode; 
+        document.getElementById('setting-default-sort').value = appSettings.defaultSort; 
+        document.getElementById('gallery-sort').value = appSettings.defaultSort; 
+        changeViewMode(appSettings.viewMode, false); 
     }
 
-    // 設定タブで選択肢を変えたときにライブ反映させる
-    function updateLiveSettings() {
-        appSettings.viewMode = document.getElementById('setting-view-mode').value;
-        appSettings.defaultSort = document.getElementById('setting-default-sort').value;
-        // ギャラリー側のソート順もデフォルトに合わせて更新
-        document.getElementById('gallery-sort').value = appSettings.defaultSort;
-        changeViewMode(appSettings.viewMode, false);
+    function updateLiveSettings() { 
+        appSettings.viewMode = document.getElementById('setting-view-mode').value; 
+        appSettings.defaultSort = document.getElementById('setting-default-sort').value; 
+        document.getElementById('gallery-sort').value = appSettings.defaultSort; 
+        changeViewMode(appSettings.viewMode, false); 
     }
     
-    // Markdown混入バグ修正済みのダミー画像
+    // 定数・ユーティリティ
     const fallbackSrc = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 24 24' fill='none' stroke='%23cbd5e1' stroke-width='1.5'><rect x='3' y='3' width='18' height='18' rx='3'/><circle cx='8.5' cy='8.5' r='2'/><path d='M21 15l-5-5L5 21'/></svg>";
 
     const platformColors = {
-        'ファミコン': '#dc2626', 'ディスクシステム': '#d97706', 'スーパーファミコン': '#2563eb', 'ニンテンドー64': '#059669', 'ゲームキューブ': '#7c3aed', 'Wii': '#0284c7', 'Wii U': '#0ea5e9', 'Nintendo Switch': '#e11d48',
+        'ファミコン': '#dc2626', 'ディスクシステム': '#d97706', 'スーパーファミコン': '#2563eb', 'ニンテンドー64': '#059669', 'ゲームキューブ': '#7c3aed', 'Wii': '#0284c7', 'Wii U': '#0ea5e9', 'Nintendo Switch': '#e11d48', 'Nintendo Switch 2': '#b91c1c',
         'ゲームボーイ': '#4b5563', 'ゲームボーイカラー': '#8b5cf6', 'ゲームボーイアドバンス': '#059669', 'ニンテンドーDS': '#0284c7', 'ニンテンドー3DS': '#b45309',
         'PS1': '#312e81', 'PS2': '#1e40af', 'PS3': '#0f172a', 'PS4': '#1d4ed8', 'PS5': '#2563eb', 'PSP': '#475569', 'PS Vita': '#0891b2',
         'PCエンジン': '#ea580c', 'PCエンジンCD-ROM2': '#9a3412', 'セガサターン': '#7c2d12', 'ドリームキャスト': '#f97316', 'メガドライブ': '#111827', 'ゲームギア': '#1e3a8a',
@@ -575,348 +738,582 @@
         'Xbox': '#16a34a', 'Xbox 360': '#22c55e', 'Xbox One': '#15803d', 'Xbox Series X/S': '#14532d', 'PC': '#000000', 'アーケード': '#f59e0b'
     };
 
-    const platformShortNames = {
-        'Nintendo Switch': 'Switch', 'スーパーファミコン': 'SFC', 'ファミコン': 'FC', 'ディスクシステム': 'FCD', 'ニンテンドー64': 'N64', 'ゲームボーイ': 'GB', 'ゲームボーイカラー': 'GBC', 'ゲームボーイアドバンス': 'GBA', 
-        'ニンテンドーDS': 'DS', 'ニンテンドー3DS': '3DS', 'ゲームキューブ': 'GC', 'ドリームキャスト': 'DC', 'メガドライブ': 'MD', 'PCエンジン': 'PCE', 'セガサターン': 'SS',
-        'ワンダースワン': 'WS', 'ワンダースワンカラー': 'WSC', 'Xbox Series X/S': 'XSX/S'
+    const platformShortNames = { 
+        'Nintendo Switch': 'Switch', 'Nintendo Switch 2': 'Switch 2', 'スーパーファミコン': 'SFC', 'ファミコン': 'FC', 'ディスクシステム': 'FCD', 'ニンテンドー64': 'N64', 'ゲームボーイ': 'GB', 'ゲームボーイカラー': 'GBC', 'ゲームボーイアドバンス': 'GBA', 'ニンテンドーDS': 'DS', 'ニンテンドー3DS': '3DS', 'ゲームキューブ': 'GC', 'ドリームキャスト': 'DC', 'メガドライブ': 'MD', 'PCエンジン': 'PCE', 'セガサターン': 'SS', 'ワンダースワン': 'WS', 'ワンダースワンカラー': 'WSC', 'Xbox Series X/S': 'XSX/S' 
     };
 
+    // 初期化処理
     window.addEventListener('DOMContentLoaded', () => {
-        applySettingsToUI();
-        updateCount(); renderEditorList(); buildFilters(); setupDragAndDrop(); setupPasteEvent(); updatePromptPreview();
-        document.getElementById('game-image').addEventListener('input', (e) => {
-            const val = e.target.value.trim(); document.getElementById('form-img-preview').src = val ? val : fallbackSrc;
+        applySettingsToUI(); 
+        updateCount(); 
+        renderEditorList(); 
+        buildFilters(); 
+        setupDragAndDrop(); 
+        setupPasteEvent(); 
+        updatePromptPreview();
+
+        document.getElementById('game-image').addEventListener('input', (e) => { 
+            document.getElementById('form-img-preview').src = e.target.value.trim() ? e.target.value.trim() : fallbackSrc; 
         });
 
-        document.querySelectorAll('#game-dot-selector .dot-chip').forEach(chip => {
-            chip.addEventListener('click', () => chip.classList.toggle('active'));
+        document.querySelectorAll('#game-dot-selector .dot-chip').forEach(chip => { 
+            chip.addEventListener('click', () => chip.classList.toggle('active')); 
+        });
+        
+        // 新ハード「その他」選択時の自由入力処理
+        document.getElementById('game-platform').addEventListener('change', function(e) {
+            if (e.target.value === 'その他') {
+                const customHardware = prompt("新ハード名や、リストにないハード名を入力してください:\n（キャンセルまたは空欄の場合は「その他」になります）");
+                if (customHardware && customHardware.trim() !== "") {
+                    const newOption = document.createElement('option');
+                    newOption.value = customHardware.trim();
+                    newOption.textContent = customHardware.trim();
+                    newOption.selected = true;
+                    const optgroups = this.querySelectorAll('optgroup');
+                    optgroups[optgroups.length - 1].insertBefore(newOption, this.querySelector('option[value="その他"]'));
+                }
+            }
         });
     });
 
-    // モーダル表示用関数
-    async function startupLoad() {
-        await startJSONFileSync();
-        if(jsonFileHandle || gameList.length > 0) { document.getElementById('startup-modal').style.display = 'none'; }
+    // 起動・ファイル同期
+    async function startupLoad() { 
+        await startJSONFileSync(); 
+        if (jsonFileHandle || gameList.length > 0) { 
+            document.getElementById('startup-modal').style.display = 'none'; 
+        } 
     }
-    function startupNew() { document.getElementById('startup-modal').style.display = 'none'; }
+    
+    function startupNew() { 
+        document.getElementById('startup-modal').style.display = 'none'; 
+    }
 
-    // --- 同期インジケーター管理 ---
     function updateSyncDotUI(isActive) {
         const dots = [document.getElementById('sync-dot'), document.getElementById('settings-sync-dot')];
-        dots.forEach(dot => {
-            if (!dot) return;
-            if (isActive) { dot.classList.add('active'); dot.title = "接続完了（自動同期中）"; } 
-            else { dot.classList.remove('active'); dot.title = "未接続"; }
+        dots.forEach(dot => { 
+            if (!dot) return; 
+            if (isActive) { 
+                dot.classList.add('active'); 
+                dot.title = "接続完了（自動同期中）"; 
+            } else { 
+                dot.classList.remove('active'); 
+                dot.title = "未接続"; 
+            } 
         });
     }
 
-    // --- ファイル連携 ---
     async function startJSONFileSync() {
         try {
             if (window.showOpenFilePicker) {
-                const [handle] = await window.showOpenFilePicker({ types: [{ description: 'JSON Database', accept: { 'application/json': ['.json'] } }], multiple: false });
-                jsonFileHandle = handle; const file = await jsonFileHandle.getFile(); await parseAndLoadFile(file);
+                const [handle] = await window.showOpenFilePicker({ 
+                    types: [{ description: 'JSON Database', accept: { 'application/json': ['.json'] } }], 
+                    multiple: false 
+                });
+                jsonFileHandle = handle; 
+                const file = await jsonFileHandle.getFile(); 
+                await parseAndLoadFile(file); 
                 updateSyncDotUI(true);
-            } else { fallbackFileLoad(); }
-        } catch (err) { if (err.name !== 'AbortError') alert("ファイル読込失敗: " + err.message); }
+            } else { 
+                fallbackFileLoad(); 
+            }
+        } catch (err) { 
+            if (err.name !== 'AbortError') alert("ファイル読込失敗: " + err.message); 
+        }
     }
-    function fallbackFileLoad() {
-        const input = document.createElement('input'); input.type = 'file'; input.accept = '.json';
-        input.onchange = async (e) => {
-            const file = e.target.files[0]; if(!file) return; await parseAndLoadFile(file);
-            updateSyncDotUI(true); alert(`ブラウザ非対応のため、編集後は「手動で保存」してください。`);
-        }; input.click();
+
+    function fallbackFileLoad() { 
+        const input = document.createElement('input'); 
+        input.type = 'file'; 
+        input.accept = '.json'; 
+        input.onchange = async (e) => { 
+            const file = e.target.files[0]; 
+            if(!file) return; 
+            await parseAndLoadFile(file); 
+            updateSyncDotUI(true); 
+            alert(`ブラウザ非対応のため手動保存が必要です。`); 
+        }; 
+        input.click(); 
     }
+
     async function parseAndLoadFile(file) {
         const text = await file.text();
         if (text.trim()) {
             try {
                 const imported = JSON.parse(text);
                 if (Array.isArray(imported)) {
-                    imported.forEach(g => { if (g.maker && !g.publisher) { g.publisher = g.maker; delete g.maker; } });
+                    imported.forEach(g => { 
+                        if (g.maker && !g.publisher) { 
+                            g.publisher = g.maker; 
+                            delete g.maker; 
+                        } 
+                    });
                     if (gameList.length > 0) {
-                        let added = 0;
-                        imported.forEach(imp => {
-                            if (!gameList.find(g => g.title === imp.title && g.platform === imp.platform)) { gameList.push(imp); added++; }
-                        });
-                        alert(`📂 既存データと結合し、${added} 件追加しました！`);
-                    } else { gameList = imported; alert(`📂 読み込み完了（${gameList.length}件）`); }
-                    updateCount(); renderEditorList(); buildFilters();
-                    if (document.getElementById('gallery-view').classList.contains('active')) renderGallery();
+                        let added = 0; 
+                        imported.forEach(imp => { 
+                            if (!gameList.find(g => g.title === imp.title && g.platform === imp.platform)) { 
+                                gameList.push(imp); 
+                                added++; 
+                            } 
+                        }); 
+                        alert(`📂 ${added} 件追加しました！`);
+                    } else { 
+                        gameList = imported; 
+                        alert(`📂 読み込み完了（${gameList.length}件）`); 
+                    }
+                    updateCount(); 
+                    renderEditorList(); 
+                    buildFilters(); 
                     updatePromptPreview();
-                } else { alert("配列データではありません。"); }
-            } catch(e) { alert("JSON解析エラー: " + e.message); }
-        } else { gameList = []; updateSyncDotUI(true); }
+                    
+                    if (document.getElementById('gallery-view').classList.contains('active')) renderGallery();
+                    if (document.getElementById('analytics-view').classList.contains('active')) { 
+                        renderAnalyticsSummary(); 
+                        renderAnalyticsChart(); 
+                    }
+                }
+            } catch(e) { 
+                alert("JSON解析エラー: " + e.message); 
+            }
+        } else { 
+            gameList = []; 
+            updateSyncDotUI(true); 
+        }
     }
-    async function autoWriteToJSONFile() {
-        if (!jsonFileHandle) return; 
-        try { const writable = await jsonFileHandle.createWritable(); await writable.write(JSON.stringify(gameList, null, 2)); await writable.close(); }
-        catch (err) { console.error("保存エラー", err); updateSyncDotUI(false); jsonFileHandle = null; }
-    }
-    function executeSave() { autoWriteToJSONFile(); }
 
-    // --- UI 制御 ---
+    async function autoWriteToJSONFile() { 
+        if (!jsonFileHandle) return; 
+        try { 
+            const writable = await jsonFileHandle.createWritable(); 
+            await writable.write(JSON.stringify(gameList, null, 2)); 
+            await writable.close(); 
+        } catch (err) { 
+            updateSyncDotUI(false); 
+            jsonFileHandle = null; 
+        } 
+    }
+
+    function executeSave() { 
+        autoWriteToJSONFile(); 
+    }
+
+    // タブ切り替え・UI制御
     function switchTab(tabId) {
         document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
         document.querySelectorAll('.view-section').forEach(view => view.classList.remove('active'));
-        const tabBtn = document.querySelector(`.tab-btn[onclick="switchTab('${tabId}')"]`);
+        
+        const tabBtn = document.querySelector(`.tab-btn[onclick="switchTab('${tabId}')"]`); 
         if(tabBtn) tabBtn.classList.add('active');
+        
         document.getElementById(tabId).classList.add('active');
+        
         if (tabId === 'gallery-view') renderGallery();
         if (tabId === 'settings-view') updatePromptPreview();
+        if (tabId === 'analytics-view') { 
+            renderAnalyticsSummary(); 
+            renderAnalyticsChart(); 
+        }
     }
-    
+
     function changeViewMode(mode, fromButtonClick = true) {
-        currentViewMode = mode;
+        currentViewMode = mode; 
         document.querySelectorAll('.toggle-btn').forEach(btn => btn.classList.remove('active'));
-        const btn = document.getElementById(`btn-view-${mode}`);
+        
+        const btn = document.getElementById(`btn-view-${mode}`); 
         if(btn) btn.classList.add('active');
         
-        // ボタンによる手動切り替えの場合は、裏で設定上のviewModeだけは更新しておく
-        if(fromButtonClick) {
-            appSettings.viewMode = mode;
-            document.getElementById('setting-view-mode').value = mode;
+        if(fromButtonClick) { 
+            appSettings.viewMode = mode; 
+            document.getElementById('setting-view-mode').value = mode; 
         }
-        
         if (document.getElementById('gallery-view').classList.contains('active')) renderGallery();
     }
 
+    // フォーマット系ヘルパー
     function getPlatformColor(p) { return platformColors[p] || '#64748b'; }
     function getShortPlatform(p) { return platformShortNames[p] || p; }
     function getStars(r) { return r ? '★'.repeat(r) + '☆'.repeat(5-r) : '-'; }
+    
     function formatPrice(val) {
         if (!val || String(val).trim() === '') return '-';
-        const strVal = String(val).trim(); const num = Number(strVal.replace(/[,¥￥]/g, ''));
+        const strVal = String(val).trim(); 
+        const num = Number(strVal.replace(/[^0-9]/g, ''));
         return (!isNaN(num) && strVal !== '') ? '¥' + num.toLocaleString() : strVal;
     }
-    function escapeHtml(s) { return s ? String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;') : ''; }
-    function updateCount() { document.getElementById('total-count').textContent = gameList.length; }
+    
+    function escapeHtml(s) { 
+        return s ? String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;') : ''; 
+    }
+    
+    function updateCount() { 
+        document.getElementById('total-count').textContent = gameList.length; 
+    }
 
     function buildFilters() {
-        const pSel = document.getElementById('gallery-filter-platform'), gSel = document.getElementById('gallery-filter-genre');
-        const pVal = pSel.value, gVal = gSel.value;
-        pSel.innerHTML = '<option value="ALL">全ハード</option>';
-        [...new Set(gameList.map(g => g.platform))].sort().forEach(p => pSel.innerHTML += `<option value="${p}" ${p===pVal?'selected':''}>${p}</option>`);
-        gSel.innerHTML = '<option value="ALL">全ジャンル</option>';
-        [...new Set(gameList.filter(g=>g.genre).map(g => g.genre))].sort().forEach(g => gSel.innerHTML += `<option value="${g}" ${g===gVal?'selected':''}>${g}</option>`);
-    }
-
-    function getMicroDotsHtml(dots) {
-        if (!dots || !Array.isArray(dots) || dots.length === 0) return '';
-        return `<span class="micro-dots">` + dots.map(d => `<span class="micro-dot dc-${d}"></span>`).join('') + `</span>`;
-    }
-
-    // --- 画像・スキャン ---
-    function searchOnGoogle() {
-        const t = document.getElementById('game-title').value.trim();
-        const p = document.getElementById('game-platform').value;
-        const jan = document.getElementById('game-jan').value.trim();
-        const isPlaceholder = t.includes('AI取得待ち');
-        const query = (t && !isPlaceholder) ? `${t} ${p} パッケージ` : `${jan} ゲーム パッケージ`;
-        if(!query.trim()) return alert("タイトルかJANコードを入力してください。");
-        window.open(`https://www.google.com/search?q=${encodeURIComponent(query)}&tbm=isch`, '_blank');
-    }   
-    function clearImage() { document.getElementById('game-image').value = ''; document.getElementById('form-img-preview').src = fallbackSrc; }
-    function setupDragAndDrop() {
-        const dz = document.getElementById('drop-zone');
-        dz.addEventListener('click', () => document.getElementById('manual-file-input').click());
-        document.getElementById('manual-file-input').addEventListener('change', (e) => { if(e.target.files.length) processImageFile(e.target.files[0]); });
-        dz.addEventListener('dragover', (e) => { e.preventDefault(); dz.style.background = '#e2e8f0'; });
-        dz.addEventListener('dragleave', () => dz.style.background = 'var(--bg-color)');
-        dz.addEventListener('drop', (e) => { e.preventDefault(); dz.style.background = 'var(--bg-color)'; if(e.dataTransfer.files.length) processImageFile(e.dataTransfer.files[0]); });
-    }
-    function setupPasteEvent() {
-        window.addEventListener('paste', (e) => {
-            const items = (e.clipboardData || e.originalEvent.clipboardData).items;
-            for (let i=0; i<items.length; i++) { if (items[i].type.indexOf('image') !== -1) { processImageFile(items[i].getAsFile()); break; } }
+        const pSel = document.getElementById('gallery-filter-platform');
+        const gSel = document.getElementById('gallery-filter-genre');
+        const pVal = pSel.value;
+        const gVal = gSel.value;
+        
+        pSel.innerHTML = '<option value="ALL">全ハード</option>'; 
+        [...new Set(gameList.map(g => g.platform))].sort().forEach(p => {
+            pSel.innerHTML += `<option value="${p}" ${p===pVal ? 'selected' : ''}>${p}</option>`;
+        });
+        
+        gSel.innerHTML = '<option value="ALL">全ジャンル</option>'; 
+        [...new Set(gameList.filter(g => g.genre).map(g => g.genre))].sort().forEach(g => {
+            gSel.innerHTML += `<option value="${g}" ${g===gVal ? 'selected' : ''}>${g}</option>`;
         });
     }
-    function processImageFile(file) {
-        if (!file.type.startsWith('image/')) return;
-        const reader = new FileReader(); reader.onload = e => { document.getElementById('game-image').value = e.target.result; document.getElementById('form-img-preview').src = e.target.result; };
-        reader.readAsDataURL(file);
+
+    function getMicroDotsHtml(dots) { 
+        if (!dots || !Array.isArray(dots) || dots.length === 0) return ''; 
+        return `<span class="micro-dots">` + dots.map(d => `<span class="micro-dot dc-${d}"></span>`).join('') + `</span>`; 
     }
+
+    // 画像と検索関連
+    function searchOnGoogle() {
+        const t = document.getElementById('game-title').value.trim(); 
+        const p = document.getElementById('game-platform').value; 
+        const jan = document.getElementById('game-jan').value.trim();
+        const query = (t && !t.includes('AI取得待ち')) ? `${t} ${p} パッケージ` : `${jan} ゲーム パッケージ`;
+        
+        if(!query.trim()) return alert("入力してください。"); 
+        window.open(`https://www.google.com/search?q=${encodeURIComponent(query)}&tbm=isch`, '_blank');
+    }   
+
+    function clearImage() { 
+        document.getElementById('game-image').value = ''; 
+        document.getElementById('form-img-preview').src = fallbackSrc; 
+    }
+
+    function setupDragAndDrop() {
+        const dz = document.getElementById('drop-zone'); 
+        dz.addEventListener('click', () => document.getElementById('manual-file-input').click());
+        
+        document.getElementById('manual-file-input').addEventListener('change', (e) => { 
+            if(e.target.files.length) processImageFile(e.target.files[0]); 
+        });
+        
+        dz.addEventListener('dragover', (e) => { 
+            e.preventDefault(); 
+            dz.style.background = '#e2e8f0'; 
+        }); 
+        
+        dz.addEventListener('dragleave', () => {
+            dz.style.background = 'var(--bg-color)';
+        });
+        
+        dz.addEventListener('drop', (e) => { 
+            e.preventDefault(); 
+            dz.style.background = 'var(--bg-color)'; 
+            if(e.dataTransfer.files.length) processImageFile(e.dataTransfer.files[0]); 
+        });
+    }
+
+    function setupPasteEvent() { 
+        window.addEventListener('paste', (e) => { 
+            const items = (e.clipboardData || e.originalEvent.clipboardData).items; 
+            for (let i = 0; i < items.length; i++) { 
+                if (items[i].type.indexOf('image') !== -1) { 
+                    processImageFile(items[i].getAsFile()); 
+                    break; 
+                } 
+            } 
+        }); 
+    }
+
+    function processImageFile(file) { 
+        if (!file.type.startsWith('image/')) return; 
+        const reader = new FileReader(); 
+        reader.onload = e => { 
+            document.getElementById('game-image').value = e.target.result; 
+            document.getElementById('form-img-preview').src = e.target.result; 
+        }; 
+        reader.readAsDataURL(file); 
+    }
+    
     function normalizeForMatch(str) { 
-        if (!str) return '';
-        return String(str)
-            .replace(/[Ａ-Ｚａ-ｚ０-９]/g, s => String.fromCharCode(s.charCodeAt(0)-0xFEE0))
+        return String(str||'').replace(/[Ａ-Ｚａ-ｚ０-９]/g, s => String.fromCharCode(s.charCodeAt(0)-0xFEE0))
             .replace(/[\(（\[【].*?[\)）\]】]/g, '')
             .replace(/[\s\-_:：・／\/＼,，.．!！?？~～]/g, '')
             .toLowerCase(); 
     }
 
     async function bulkImportFolderImages(event) {
-        const files = event.target.files; if (!files || files.length === 0) return;
+        const files = event.target.files; 
+        if (!files || files.length === 0) return; 
         let count = 0;
-        for (let i=0; i<files.length; i++) {
-            const f = files[i]; if (!f.type.startsWith('image/')) continue;
-            const baseName = f.name.substring(0, f.name.lastIndexOf('.'));
-            const normFile = normalizeForMatch(baseName); if(!normFile) continue;
-
+        
+        for (let i = 0; i < files.length; i++) {
+            const f = files[i]; 
+            if (!f.type.startsWith('image/')) continue; 
+            
+            const baseName = f.name.substring(0, f.name.lastIndexOf('.')); 
+            const normFile = normalizeForMatch(baseName); 
+            if(!normFile) continue;
+            
             const match = gameList.find(g => { 
                 const nj = normalizeForMatch(g.jan);
+                const nt = normalizeForMatch(g.title);
                 if (g.jan && (baseName.includes(g.jan) || normFile === nj)) return true;
                 if (!g.title || g.title.includes("AI取得待ち")) return false;
-                const nt = normalizeForMatch(g.title);
-                if (!nt) return false;
                 if (normFile === nt) return true;
-                if (nt.length >= 4 && normFile.length >= 4) { if (normFile.includes(nt) || nt.includes(normFile)) return true; }
+                if (nt.length >= 4 && normFile.length >= 4 && (normFile.includes(nt) || nt.includes(normFile))) return true; 
                 return false;
             });
-            if (match) { match.image = `images/${f.name}`; count++; }
+            
+            if (match) { 
+                match.image = `images/${f.name}`; 
+                count++; 
+            }
         }
         if (count > 0) { 
-            executeSave(); renderEditorList(); 
-            if(document.getElementById('gallery-view').classList.contains('active')) renderGallery(); 
-            alert(`♻️ ${count}件の画像パスを自動セットしました！`); 
-        } else {
-            alert("一致する画像が見つかりませんでした。");
-        }
+            executeSave(); 
+            renderEditorList(); 
+            alert(`♻️ ${count}件の画像をセットしました`); 
+        } 
         event.target.value = '';
     }    
 
+    // データ登録・編集
     function saveGameRecord(e) {
         if (e) e.preventDefault(); 
-        const selectedDots = [];
-        document.querySelectorAll('#game-dot-selector .dot-chip.active').forEach(chip => { selectedDots.push(chip.dataset.color); });
-
-        let titleVal = document.getElementById('game-title').value.trim();
+        
+        const selectedDots = []; 
+        document.querySelectorAll('#game-dot-selector .dot-chip.active').forEach(chip => { 
+            selectedDots.push(chip.dataset.color); 
+        });
+        
+        let titleVal = document.getElementById('game-title').value.trim(); 
         const janVal = document.getElementById('game-jan').value.trim();
-
-        if (!titleVal && !janVal) return alert("タイトルかJANコードのどちらかは入力してください。");
+        
+        if (!titleVal && !janVal) return alert("タイトルかJANコードを入力してください。");
         if (!titleVal && janVal) titleVal = "⏳ AI取得待ち (JAN: " + janVal + ")";
 
         const data = {
-            title: titleVal, platform: document.getElementById('game-platform').value, 
-            jan: janVal, series: document.getElementById('game-series').value.trim(),
-            model: document.getElementById('game-model').value.trim(), release: document.getElementById('game-release').value.trim(), 
-            publisher: document.getElementById('game-publisher').value.trim(), developer: document.getElementById('game-developer').value.trim(),
-            genre: document.getElementById('game-genre').value.trim(), rating: document.getElementById('game-rating').value,
-            price: document.getElementById('game-price').value || "", shop: document.getElementById('user-shop').value || "", 
-            buyPrice: document.getElementById('user-buy-price').value || "", image: document.getElementById('game-image').value.trim(), 
-            review: document.getElementById('game-review').value.trim(), isLocked: document.getElementById('game-lock').checked,
+            title: titleVal, 
+            platform: document.getElementById('game-platform').value, 
+            jan: janVal, 
+            series: document.getElementById('game-series').value.trim(),
+            model: document.getElementById('game-model').value.trim(), 
+            release: document.getElementById('game-release').value.trim(), 
+            publisher: document.getElementById('game-publisher').value.trim(), 
+            developer: document.getElementById('game-developer').value.trim(),
+            genre: document.getElementById('game-genre').value.trim(), 
+            peripherals: document.getElementById('game-peripherals').value.trim(),
+            rating: document.getElementById('game-rating').value, 
+            price: document.getElementById('game-price').value || "", 
+            buyDate: document.getElementById('user-buy-date').value || "", 
+            shop: document.getElementById('user-shop').value || "", 
+            buyPrice: document.getElementById('user-buy-price').value || "", 
+            image: document.getElementById('game-image').value.trim(), 
+            review: document.getElementById('game-review').value.trim(), 
+            isLocked: document.getElementById('game-lock').checked, 
+            excludeAnalytics: document.getElementById('game-exclude-analytics').checked, 
             dots: selectedDots
         };
-
-        if (editIndex === -1) { gameList.unshift(data); } else { gameList[editIndex] = data; }
-        executeSave(); cancelEdit(); updateCount(); renderEditorList(); buildFilters(); updatePromptPreview();
+        
+        if (editIndex === -1) { 
+            gameList.unshift(data); 
+        } else { 
+            gameList[editIndex] = data; 
+        }
+        
+        executeSave(); 
+        cancelEdit(); 
+        updateCount(); 
+        renderEditorList(); 
+        buildFilters(); 
+        updatePromptPreview(); 
         return true;
     }
+    
     document.getElementById('game-form').addEventListener('submit', saveGameRecord);
 
+    // カメラバーコードスキャン (QuaggaJS)
     let isScanning = false;
     
-    // スキャナー用ライブラリ保護
-    if (typeof Quagga !== 'undefined') {
-        Quagga.onDetected(res => {
-            if (res && res.codeResult && res.codeResult.code) {
-                const code = res.codeResult.code;
-                if (code.length === 13 || code.length === 8) {
-                    document.getElementById('game-jan').value = code;
-                    Quagga.stop(); isScanning = false; 
-                    document.getElementById('interactive').style.display = 'none'; 
-                    document.getElementById('btn-toggle-scan').textContent = '📷';
-                    if (editIndex !== -1) cancelEdit();
-                    
-                    document.getElementById('game-jan').value = code;
-                    const titleInput = document.getElementById('game-title');
-                    if (!titleInput.value.trim()) titleInput.value = "⏳ AI取得待ち (JAN: " + code + ")";
-                    
-                    setTimeout(() => {
-                        if (saveGameRecord()) {
-                            const toast = document.createElement('div');
-                            toast.innerHTML = `✅ <b>${code}</b> を登録しました！<br>続けて次のバーコードをスキャンできます。`;
-                            toast.style.cssText = "position:fixed; top:20px; left:50%; transform:translateX(-50%); background:var(--success-color); color:white; padding:12px 20px; border-radius:var(--radius-md); box-shadow:var(--shadow-hover); z-index:9999; font-size:13px; text-align:center; animation: fadeIn 0.3s ease;";
-                            document.body.appendChild(toast);
-                            setTimeout(() => toast.remove(), 3000);
-                        }
-                    }, 100);
-                }
+    function handleBarcodeDetection(res) {
+        if (res && res.codeResult && res.codeResult.code) {
+            const code = res.codeResult.code;
+            if (code.length === 13 || code.length === 8) {
+                document.getElementById('game-jan').value = code; 
+                Quagga.stop(); 
+                isScanning = false; 
+                document.getElementById('interactive').style.display = 'none'; 
+                document.getElementById('btn-toggle-scan').textContent = '📷';
+                
+                if (editIndex !== -1) cancelEdit(); 
+                
+                document.getElementById('game-jan').value = code;
+                const titleInput = document.getElementById('game-title'); 
+                if (!titleInput.value.trim()) titleInput.value = "⏳ AI取得待ち (JAN: " + code + ")";
+                
+                setTimeout(() => { 
+                    if (saveGameRecord(null)) { 
+                        alert(`✅ ${code} を登録しました`); 
+                    } 
+                }, 100);
             }
-        });
+        }
+    }
+
+    if (typeof Quagga !== 'undefined') {
+        Quagga.onDetected(handleBarcodeDetection);
     }
 
     document.getElementById('btn-toggle-scan').addEventListener('click', () => {
-        if (typeof Quagga === 'undefined') {
-            alert("カメラ用ライブラリの読み込みに失敗しています。インターネット接続を確認して再読み込みしてください。");
-            return;
-        }
-
+        if (typeof Quagga === 'undefined') return alert("カメラライブラリの読み込みに失敗しています。");
         const div = document.getElementById('interactive');
-        if (isScanning) { Quagga.stop(); isScanning = false; div.style.display = 'none'; document.getElementById('btn-toggle-scan').textContent = '📷'; } 
-        else {
-            div.style.display = 'block';
-            Quagga.init({ inputStream: { name: "Live", type: "LiveStream", target: document.querySelector('#interactive'), constraints: { facingMode: "environment" } }, decoder: { readers: ["ean_reader", "ean_8_reader"] } }, err => {
-                if (err) { alert("カメラ起動失敗"); div.style.display = 'none'; return; }
-                Quagga.start(); isScanning = true; document.getElementById('btn-toggle-scan').textContent = '⏹️';
-            });
+        
+        if (isScanning) { 
+            Quagga.stop(); 
+            isScanning = false; 
+            div.style.display = 'none'; 
+            document.getElementById('btn-toggle-scan').textContent = '📷'; 
+        } else { 
+            div.style.display = 'block'; 
+            Quagga.init({ 
+                inputStream: { 
+                    name: "Live", 
+                    type: "LiveStream", 
+                    target: document.querySelector('#interactive'), 
+                    constraints: { facingMode: "environment" } 
+                }, 
+                decoder: { readers: ["ean_reader", "ean_8_reader"] } 
+            }, err => { 
+                if (err) { 
+                    console.error("Camera Error:", err);
+                    alert("カメラの起動に失敗しました。ブラウザの権限設定を確認してください。"); 
+                    div.style.display = 'none'; 
+                    isScanning = false;
+                    document.getElementById('btn-toggle-scan').textContent = '📷';
+                    return; 
+                } 
+                Quagga.start(); 
+                isScanning = true; 
+                document.getElementById('btn-toggle-scan').textContent = '⏹️'; 
+            }); 
         }
     });
 
+    // 編集・キャンセル・削除
     function loadToEditor(idx) {
-        editIndex = idx; const g = gameList[idx];
+        editIndex = idx; 
+        const g = gameList[idx]; 
         document.getElementById('form-mode').textContent = `[編集中]`;
-        document.getElementById('game-title').value = g.title; document.getElementById('game-platform').value = g.platform; 
-        document.getElementById('game-jan').value = g.jan || ''; document.getElementById('game-series').value = g.series || '';
-        document.getElementById('game-model').value = g.model || ''; document.getElementById('game-release').value = g.release || ''; 
-        document.getElementById('game-publisher').value = g.publisher || g.maker || ''; document.getElementById('game-developer').value = g.developer || '';
-        document.getElementById('game-genre').value = g.genre || ''; document.getElementById('game-rating').value = g.rating || '';
-        document.getElementById('game-price').value = g.price || ''; document.getElementById('user-shop').value = g.shop || ''; 
-        document.getElementById('user-buy-price').value = g.buyPrice || ''; document.getElementById('game-image').value = g.image || ''; 
-        document.getElementById('game-review').value = g.review || ''; document.getElementById('game-lock').checked = !!g.isLocked;
+        
+        // プラットフォームの動的追加
+        const platSelect = document.getElementById('game-platform');
+        let platExists = Array.from(platSelect.options).some(opt => opt.value === g.platform);
+        if(!platExists && g.platform && g.platform !== 'その他') {
+            const opt = document.createElement('option'); 
+            opt.value = g.platform; 
+            opt.textContent = g.platform;
+            const groups = platSelect.querySelectorAll('optgroup');
+            groups[groups.length - 1].insertBefore(opt, platSelect.querySelector('option[value="その他"]'));
+        }
+        
+        document.getElementById('game-title').value = g.title; 
+        document.getElementById('game-platform').value = g.platform || 'その他'; 
+        document.getElementById('game-jan').value = g.jan || ''; 
+        document.getElementById('game-series').value = g.series || '';
+        document.getElementById('game-model').value = g.model || ''; 
+        document.getElementById('game-release').value = g.release || ''; 
+        document.getElementById('game-publisher').value = g.publisher || g.maker || ''; 
+        document.getElementById('game-developer').value = g.developer || '';
+        document.getElementById('game-genre').value = g.genre || ''; 
+        document.getElementById('game-peripherals').value = g.peripherals || ''; 
+        document.getElementById('game-rating').value = g.rating || '';
+        document.getElementById('game-price').value = g.price || ''; 
+        document.getElementById('user-buy-date').value = g.buyDate || ''; 
+        document.getElementById('user-shop').value = g.shop || ''; 
+        document.getElementById('user-buy-price').value = g.buyPrice || ''; 
+        document.getElementById('game-image').value = g.image || ''; 
+        document.getElementById('game-review').value = g.review || ''; 
+        document.getElementById('game-lock').checked = !!g.isLocked; 
+        document.getElementById('game-exclude-analytics').checked = !!g.excludeAnalytics;
         document.getElementById('form-img-preview').src = g.image ? g.image : fallbackSrc;
         
         document.querySelectorAll('#game-dot-selector .dot-chip').forEach(chip => chip.classList.remove('active'));
-        if (g.dots && Array.isArray(g.dots)) {
-            g.dots.forEach(color => {
-                const chip = document.querySelector(`#game-dot-selector .dot-chip[data-color="${color}"]`);
-                if (chip) chip.classList.add('active');
-            });
+        if (g.dots && Array.isArray(g.dots)) { 
+            g.dots.forEach(color => { 
+                const chip = document.querySelector(`#game-dot-selector .dot-chip[data-color="${color}"]`); 
+                if (chip) chip.classList.add('active'); 
+            }); 
         }
-
-        document.getElementById('btn-submit').textContent = "⚡ 変更を保存"; document.getElementById('btn-cancel-edit').style.display = 'inline-flex';
-        switchTab('editor-view'); window.scrollTo({ top: 0, behavior: 'smooth' });
+        
+        document.getElementById('btn-submit').textContent = "⚡ 変更を保存"; 
+        document.getElementById('btn-cancel-edit').style.display = 'inline-flex';
+        switchTab('editor-view'); 
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     function cancelEdit() {
-        editIndex = -1; document.getElementById('form-mode').textContent = `[新規登録]`;
-        const pKeep = document.getElementById('game-platform').value; document.getElementById('game-form').reset(); 
-        document.getElementById('game-platform').value = pKeep; document.getElementById('game-image').value = ''; 
-        document.getElementById('form-img-preview').src = fallbackSrc; document.getElementById('game-lock').checked = false;
+        editIndex = -1; 
+        document.getElementById('form-mode').textContent = `[新規登録]`;
+        const pKeep = document.getElementById('game-platform').value; 
+        
+        document.getElementById('game-form').reset(); 
+        document.getElementById('game-platform').value = pKeep; 
+        document.getElementById('game-image').value = ''; 
+        document.getElementById('user-buy-date').value = ''; 
+        document.getElementById('form-img-preview').src = fallbackSrc; 
+        document.getElementById('game-lock').checked = false; 
+        document.getElementById('game-exclude-analytics').checked = false;
+        
         document.querySelectorAll('#game-dot-selector .dot-chip').forEach(chip => chip.classList.remove('active'));
-        document.getElementById('btn-submit').textContent = "💾 登録 (自動保存)"; document.getElementById('btn-cancel-edit').style.display = 'none';
+        document.getElementById('btn-submit').textContent = "💾 登録 (自動保存)"; 
+        document.getElementById('btn-cancel-edit').style.display = 'none';
     }
     
-    function deleteGame(idx) {
-        if (confirm(`「${gameList[idx].title}」を削除しますか？`)) { gameList.splice(idx, 1); executeSave(); updateCount(); renderEditorList(); buildFilters(); updatePromptPreview(); }
+    function deleteGame(idx) { 
+        if (confirm(`「${gameList[idx].title}」を削除しますか？`)) { 
+            gameList.splice(idx, 1); 
+            executeSave(); 
+            updateCount(); 
+            renderEditorList(); 
+            buildFilters(); 
+            updatePromptPreview(); 
+        } 
     }
 
+    // テーブル描画
     function renderEditorList() {
-        const tbody = document.getElementById('editor-table-body'); const q = document.getElementById('table-search').value.toLowerCase().trim();
-        tbody.innerHTML = ''; const qs = q.split(/\s+/).filter(k => k);
+        const tbody = document.getElementById('editor-table-body'); 
+        const q = document.getElementById('table-search').value.toLowerCase().trim();
+        tbody.innerHTML = ''; 
+        
+        const qs = q.split(/\s+/).filter(k => k);
         const filtered = gameList.filter(g => {
             if (qs.length === 0) return true;
-            const dotSearchStr = g.dots ? g.dots.map(d => `dot-${d} ${d}`).join(' ') : '';
-            const target = `${g.title} ${g.series||''} ${g.jan||''} ${g.platform} ${g.genre||''} ${g.publisher||''} ${g.developer||''} ${g.model||''} ${g.review||''} ${dotSearchStr}`.toLowerCase();
+            const target = `${g.title} ${g.series||''} ${g.jan||''} ${g.platform} ${g.genre||''} ${g.peripherals||''} ${g.publisher||''} ${g.developer||''} ${g.model||''} ${g.review||''}`.toLowerCase();
             return qs.every(keyword => target.includes(keyword));
         });
-        if (filtered.length === 0) { tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#94a3b8; padding:20px;">データなし</td></tr>`; return; }
+        
+        if (filtered.length === 0) { 
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#94a3b8; padding:20px;">データなし</td></tr>`; 
+            return; 
+        }
 
         filtered.forEach((g) => {
-            const idx = gameList.indexOf(g); const tr = document.createElement('tr');
-            const lockIcon = g.isLocked ? ' <span style="font-size:10px; color:#ef4444;" title="AI保護">🔒</span>' : '';
+            const idx = gameList.indexOf(g); 
+            const tr = document.createElement('tr'); 
+            const lockIcon = g.isLocked ? ' <span style="color:#ef4444;" title="AI保護">🔒</span>' : '';
+            const exclIcon = g.excludeAnalytics ? ' <span style="color:#d97706;" title="分析除外">📊</span>' : '';
+            
             tr.innerHTML = `
                 <td><img src="${g.image || fallbackSrc}" class="img-preview" onerror="this.src=fallbackSrc"></td>
-                <td class="wrap-text" style="font-weight:700; cursor:pointer;" onclick="loadToEditor(${idx})">${escapeHtml(g.title)}${getMicroDotsHtml(g.dots)}${lockIcon}<br><span style="font-size:10px; color:var(--text-muted); font-weight:normal;">${escapeHtml(g.series || '')}</span></td>
+                <td class="wrap-text" style="font-weight:700; cursor:pointer;" onclick="loadToEditor(${idx})">${escapeHtml(g.title)}${getMicroDotsHtml(g.dots)}${lockIcon}${exclIcon}<br><span style="font-size:10px; color:var(--text-muted); font-weight:normal;">${escapeHtml(g.series || '')}</span></td>
                 <td><span class="platform-badge" style="background:${getPlatformColor(g.platform)};">${getShortPlatform(g.platform)}</span></td>
-                <td class="wrap-text" style="font-size:11px;">${escapeHtml(g.genre || '-')}</td>
-                <td class="wrap-text" style="font-size:11px;">${escapeHtml(g.publisher || '-')}<br><span style="color:var(--text-muted);">${escapeHtml(g.developer || '')}</span></td>
+                <td class="wrap-text" style="font-size:11px;">${escapeHtml(g.genre || '-')}<br><span style="color:var(--accent-color);">${escapeHtml(g.peripherals || '')}</span></td>
                 <td><button class="btn btn-accent btn-sm" onclick="loadToEditor(${idx})">✏️</button> <button class="btn btn-danger btn-sm" onclick="deleteGame(${idx})">❌</button></td>
-            `; tbody.appendChild(tr);
+            `; 
+            tbody.appendChild(tr);
         });
     }
 
-    // --- ギャラリー描画 ---
+    // ギャラリー描画
     function renderGallery() {
         const fp = document.getElementById('gallery-filter-platform').value;
         const fg = document.getElementById('gallery-filter-genre').value;
@@ -924,16 +1321,14 @@
         const sort = document.getElementById('gallery-sort').value;
         const q = document.getElementById('gallery-search').value.toLowerCase().trim();
         
-        let list = gameList.map((g, idx) => ({ ...g, originalIndex: idx }));
+        let list = gameList.map((g, idx) => ({ ...g, originalIndex: idx })); 
         const qs = q.split(/\s+/).filter(k => k);
         
         list = list.filter(g => {
             if ((fp !== 'ALL' && g.platform !== fp) || (fg !== 'ALL' && g.genre !== fg)) return false;
             if (fDot !== 'ALL' && (!g.dots || !g.dots.includes(fDot))) return false;
             if (qs.length === 0) return true;
-            
-            const dotSearchStr = g.dots ? g.dots.map(d => `dot-${d} ${d}`).join(' ') : '';
-            const target = `${g.title} ${g.series||''} ${g.jan||''} ${g.platform} ${g.genre||''} ${g.publisher||''} ${g.developer||''} ${g.model||''} ${g.review||''} ${dotSearchStr}`.toLowerCase();
+            const target = `${g.title} ${g.series||''} ${g.jan||''} ${g.platform} ${g.genre||''} ${g.peripherals||''} ${g.publisher||''} ${g.developer||''} ${g.model||''} ${g.review||''}`.toLowerCase();
             return qs.every(keyword => target.includes(keyword));
         });
         
@@ -946,150 +1341,467 @@
             if (sort === 'platform') return a.platform.localeCompare(b.platform, 'ja');
             return a.originalIndex - b.originalIndex;
         });
-
-        document.getElementById('gallery-count').textContent = list.length;
-        const container = document.getElementById('gallery-render-area');
+        
+        document.getElementById('gallery-count').textContent = list.length; 
+        const container = document.getElementById('gallery-render-area'); 
         container.innerHTML = '';
-
+        
         if (list.length === 0) { 
-            container.innerHTML = `<div style="text-align:center; padding:80px 20px; color:#94a3b8; font-size:14px; background:var(--card-bg); border-radius:var(--radius-lg); border:1px dashed #cbd5e1;">該当するデータが見つかりません。</div>`; 
+            container.innerHTML = `<div style="text-align:center; padding:80px 20px; color:#94a3b8; font-size:14px; background:var(--card-bg); border-radius:var(--radius-lg); border:1px dashed #cbd5e1;">該当データなし。</div>`; 
             return; 
         }
-
-        if (currentViewMode.startsWith('grid')) renderGalleryGrid(list, container, currentViewMode.replace('grid-', ''));
-        else if (currentViewMode === 'list-rich') renderGalleryListRich(list, container);
-        else if (currentViewMode === 'list-compact') renderGalleryListCompact(list, container);
+        
+        if (currentViewMode.startsWith('grid')) {
+            renderGalleryGrid(list, container, currentViewMode.replace('grid-', ''));
+        } else if (currentViewMode === 'list-rich') {
+            renderGalleryListRich(list, container);
+        } else if (currentViewMode === 'list-compact') {
+            renderGalleryListCompact(list, container);
+        }
     }
-
-    function renderGalleryGrid(list, container, sizeMode) {
-        const gridDiv = document.createElement('div');
-        gridDiv.className = `gallery-grid mode-grid-${sizeMode}`;
-        list.forEach(g => {
-            const div = document.createElement('div'); div.className = 'gallery-card'; div.onclick = () => openModal(g.originalIndex);
-            const badge = sizeMode !== 'sm' ? `<span class="platform-badge" style="background:${getPlatformColor(g.platform)};">${getShortPlatform(g.platform)}</span>` : '';
+    
+    function renderGalleryGrid(list, container, sizeMode) { 
+        const gridDiv = document.createElement('div'); 
+        gridDiv.className = `gallery-grid mode-grid-${sizeMode}`; 
+        
+        list.forEach(g => { 
+            const div = document.createElement('div'); 
+            div.className = 'gallery-card'; 
+            div.onclick = () => openModal(g.originalIndex); 
+            const badge = sizeMode !== 'sm' ? `<span class="platform-badge" style="background:${getPlatformColor(g.platform)};">${getShortPlatform(g.platform)}</span>` : ''; 
+            
             div.innerHTML = `
                 <div class="gallery-img-wrap"><img src="${g.image || fallbackSrc}" class="gallery-img" onerror="this.src=fallbackSrc"></div>
-                <div class="gallery-info"><div class="gallery-title">${escapeHtml(g.title)}${getMicroDotsHtml(g.dots)}</div><div>${badge}</div></div>`;
-            gridDiv.appendChild(div);
-        });
-        container.appendChild(gridDiv);
+                <div class="gallery-info">
+                    <div class="gallery-title">${escapeHtml(g.title)}${getMicroDotsHtml(g.dots)}</div>
+                    <div>${badge}</div>
+                </div>
+            `; 
+            gridDiv.appendChild(div); 
+        }); 
+        container.appendChild(gridDiv); 
     }
 
-    function renderGalleryListRich(list, container) {
-        const listDiv = document.createElement('div'); listDiv.className = 'mode-list-rich';
-        list.forEach(g => {
-            const div = document.createElement('div'); div.className = 'list-card-rich'; div.onclick = (e) => { if(e.target.tagName !== 'BUTTON') openModal(g.originalIndex); };
+    function renderGalleryListRich(list, container) { 
+        const listDiv = document.createElement('div'); 
+        listDiv.className = 'mode-list-rich'; 
+        
+        list.forEach(g => { 
+            const div = document.createElement('div'); 
+            div.className = 'list-card-rich'; 
+            div.onclick = (e) => { if(e.target.tagName !== 'BUTTON') openModal(g.originalIndex); }; 
+            
             div.innerHTML = `
                 <div class="list-card-img-wrap"><img src="${g.image || fallbackSrc}" onerror="this.src=fallbackSrc"></div>
                 <div class="list-card-content">
                     <div>
                         <div class="list-card-header">
-                            <div class="list-card-title">${escapeHtml(g.title)}${getMicroDotsHtml(g.dots)} <span style="font-size:11px; font-weight:normal; color:var(--text-muted);">${escapeHtml(g.series || '')}</span></div>
+                            <div class="list-card-title">${escapeHtml(g.title)}${getMicroDotsHtml(g.dots)}</div>
                             <span class="platform-badge" style="background:${getPlatformColor(g.platform)};">${getShortPlatform(g.platform)}</span>
                         </div>
                         <div class="list-card-meta">
-                            <span title="ジャンル">🏷️ ${escapeHtml(g.genre || '-')}</span><span title="メーカー">🏢 ${escapeHtml(g.publisher || g.maker || '-')}</span><span title="発売日">📅 ${escapeHtml(g.release || '-')}</span>
+                            <span>🏷️ ${escapeHtml(g.genre || '-')}</span>
+                            <span>🏢 ${escapeHtml(g.publisher || g.maker || '-')}</span>
                         </div>
                     </div>
                     <div class="list-card-footer">
-                        <div style="display:flex; gap: 15px; align-items:center;"><span style="font-weight:800; color:var(--primary-color); font-size:14px;">${formatPrice(g.price)}</span><span class="rank-star">${getStars(g.rating)}</span></div>
+                        <div style="display:flex; gap: 15px; align-items:center;">
+                            <span style="font-weight:800; color:var(--primary-color); font-size:14px;">${formatPrice(g.price)}</span>
+                            <span class="rank-star">${getStars(g.rating)}</span>
+                        </div>
                         <button class="btn btn-accent btn-sm" onclick="loadToEditor(${g.originalIndex}); event.stopPropagation();">✏️ 編集</button>
                     </div>
-                </div>`;
-            listDiv.appendChild(div);
-        });
-        container.appendChild(listDiv);
+                </div>
+            `; 
+            listDiv.appendChild(div); 
+        }); 
+        container.appendChild(listDiv); 
     }
 
-    function renderGalleryListCompact(list, container) {
-        const wrapper = document.createElement('div'); wrapper.className = 'table-responsive mode-list-compact';
-        const table = document.createElement('table'); table.innerHTML = `<thead><tr><th>画像</th><th>タイトル / シリーズ</th><th>機種</th><th>ジャンル</th><th>販売 / 開発</th><th>型番 / JAN</th><th>発売 / 価格</th><th>評価</th><th>操作</th></tr></thead>`;
-        const tbody = document.createElement('tbody');
-        list.forEach(g => {
-            const tr = document.createElement('tr'); tr.style.cursor = 'pointer'; tr.onclick = (e) => { if(e.target.tagName !== 'BUTTON') openModal(g.originalIndex); };
+    function renderGalleryListCompact(list, container) { 
+        const wrapper = document.createElement('div'); 
+        wrapper.className = 'table-responsive mode-list-compact'; 
+        const table = document.createElement('table'); 
+        
+        table.innerHTML = `<thead><tr><th>画像</th><th>タイトル</th><th>機種</th><th>ジャンル/周辺機器</th><th>型番/JAN</th><th>評価</th></tr></thead>`; 
+        const tbody = document.createElement('tbody'); 
+        
+        list.forEach(g => { 
+            const tr = document.createElement('tr'); 
+            tr.style.cursor = 'pointer'; 
+            tr.onclick = (e) => { if(e.target.tagName !== 'BUTTON') openModal(g.originalIndex); }; 
+            
             tr.innerHTML = `
                 <td><img src="${g.image || fallbackSrc}" class="img-preview" onerror="this.src=fallbackSrc"></td>
-                <td class="wrap-text" style="font-weight:700;">${escapeHtml(g.title)}${getMicroDotsHtml(g.dots)}<br><span style="font-size:10px; color:var(--text-muted); font-weight:normal;">${escapeHtml(g.series || '')}</span></td>
+                <td class="wrap-text" style="font-weight:700;">${escapeHtml(g.title)}${getMicroDotsHtml(g.dots)}</td>
                 <td><span class="platform-badge" style="background:${getPlatformColor(g.platform)};">${getShortPlatform(g.platform)}</span></td>
-                <td class="wrap-text" style="font-size:11px;">${escapeHtml(g.genre || '-')}</td>
-                <td class="wrap-text" style="font-size:11px;">${escapeHtml(g.publisher || g.maker || '-')}<br><span style="color:var(--text-muted);">${escapeHtml(g.developer || '-')}</span></td>
+                <td style="font-size:11px;">${escapeHtml(g.genre || '-')}<br><span style="color:var(--accent-color);">${escapeHtml(g.peripherals || '')}</span></td>
                 <td style="font-size:11px; color:var(--text-muted);">${escapeHtml(g.model || '-')}<br>${escapeHtml(g.jan || '-')}</td>
-                <td style="font-size:11px;">${escapeHtml(g.release || '-')}<br><strong style="color:var(--primary-color)">${formatPrice(g.price)}</strong></td>
                 <td class="rank-star">${getStars(g.rating)}</td>
-                <td style="text-align:center;"><button class="btn btn-accent btn-sm" onclick="loadToEditor(${g.originalIndex}); event.stopPropagation();">編集</button></td>`; 
-            tbody.appendChild(tr);
-        });
-        table.appendChild(tbody); wrapper.appendChild(table); container.appendChild(wrapper);
+            `; 
+            tbody.appendChild(tr); 
+        }); 
+        table.appendChild(tbody); 
+        wrapper.appendChild(table); 
+        container.appendChild(wrapper); 
     }
 
+    // モーダル操作
     let currentViewIndex = -1;
     function openModal(idx) {
-        currentViewIndex = idx; const g = gameList[idx];
-        document.getElementById('view-title').textContent = g.title; document.getElementById('view-title-dots').innerHTML = getMicroDotsHtml(g.dots); 
-        document.getElementById('view-series').textContent = g.series || '-'; document.getElementById('view-platform').textContent = g.platform; document.getElementById('view-genre').textContent = g.genre || '-'; 
-        document.getElementById('view-rating').textContent = getStars(g.rating); document.getElementById('view-release').textContent = g.release || '-'; 
-        document.getElementById('view-price').textContent = formatPrice(g.price); document.getElementById('view-publisher').textContent = g.publisher || g.maker || '-'; 
-        document.getElementById('view-developer').textContent = g.developer || '-'; document.getElementById('view-model').textContent = g.model || '-'; 
-        document.getElementById('view-jan').textContent = g.jan || '-'; document.getElementById('view-review').textContent = g.review || 'メモなし'; 
-        document.getElementById('view-shop').textContent = g.shop || '-'; document.getElementById('view-buyPrice').textContent = formatPrice(g.buyPrice);
-        document.getElementById('view-img').src = g.image || fallbackSrc; document.getElementById('view-lock-status').textContent = g.isLocked ? '[🔒保護中]' : ''; 
+        currentViewIndex = idx; 
+        const g = gameList[idx];
+        
+        document.getElementById('view-title').textContent = g.title; 
+        document.getElementById('view-title-dots').innerHTML = getMicroDotsHtml(g.dots); 
+        document.getElementById('view-series').textContent = g.series || '-'; 
+        document.getElementById('view-platform').textContent = g.platform; 
+        document.getElementById('view-genre').textContent = g.genre || '-'; 
+        document.getElementById('view-peripherals').textContent = g.peripherals || '-'; 
+        document.getElementById('view-rating').textContent = getStars(g.rating); 
+        document.getElementById('view-release').textContent = g.release || '-'; 
+        document.getElementById('view-price').textContent = formatPrice(g.price); 
+        document.getElementById('view-publisher').textContent = g.publisher || g.maker || '-'; 
+        document.getElementById('view-developer').textContent = g.developer || '-'; 
+        document.getElementById('view-model').textContent = g.model || '-'; 
+        document.getElementById('view-jan').textContent = g.jan || '-'; 
+        document.getElementById('view-review').textContent = g.review || 'メモなし'; 
+        document.getElementById('view-buyDate').textContent = g.buyDate || '-'; 
+        document.getElementById('view-shop').textContent = g.shop || '-'; 
+        document.getElementById('view-buyPrice').textContent = formatPrice(g.buyPrice);
+        document.getElementById('view-img').src = g.image || fallbackSrc; 
+        document.getElementById('view-lock-status').textContent = g.isLocked ? '[🔒保護中]' : ''; 
+        document.getElementById('view-exclude-status').textContent = g.excludeAnalytics ? '[📊分析除外]' : '';
+        
         document.getElementById('detail-modal').style.display = 'flex';
     }
-    function closeModal() { document.getElementById('detail-modal').style.display = 'none'; currentViewIndex = -1; }
-    function editFromViewer() { if (currentViewIndex !== -1) { const idx = currentViewIndex; closeModal(); loadToEditor(idx); } }
 
-    // --- 強化版 AI 連携 ---
-    const fieldNames = { title: 'タイトル', platform: '機種', model: '型番', jan: 'JAN', release: '発売日', publisher: '販売', developer: '開発', genre: 'ジャンル', series: 'シリーズ', price: '定価' };
+    function closeModal() { 
+        document.getElementById('detail-modal').style.display = 'none'; 
+        currentViewIndex = -1; 
+    }
+
+    function editFromViewer() { 
+        if (currentViewIndex !== -1) { 
+            const idx = currentViewIndex; 
+            closeModal(); 
+            loadToEditor(idx); 
+        } 
+    }
+
+    // === 分析ビュー (Analytics) ===
+    let analyticsChartObj = null;
+    const chartColors = ['#0ea5e9', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#64748b', '#14b8a6', '#f97316', '#3b82f6', '#334155', '#eab308'];
+    const dotNames = {red:'🔴 赤印', blue:'🔵 青印', green:'🟢 緑印', yellow:'🟡 黄印', purple:'🟣 紫印'};
+    
+    function getNumPrice(p) { return Number(String(p||'').replace(/[^0-9]/g, '')) || 0; }
+
+    function renderAnalyticsSummary() {
+        let totalPrice = 0;
+        let totalBuyPrice = 0; 
+        let platforms = {};
+        let genres = {};
+        
+        const includeExcluded = document.getElementById('analytics-include-excluded').checked;
+        const targetList = gameList.filter(g => includeExcluded || !g.excludeAnalytics);
+        
+        targetList.forEach(g => {
+            totalPrice += getNumPrice(g.price); 
+            totalBuyPrice += getNumPrice(g.buyPrice);
+            platforms[g.platform] = (platforms[g.platform] || 0) + 1; 
+            if(g.genre) genres[g.genre] = (genres[g.genre] || 0) + 1;
+        });
+        
+        const topPlatform = Object.keys(platforms).sort((a,b) => platforms[b]-platforms[a])[0] || '-';
+        const topGenre = Object.keys(genres).sort((a,b) => genres[b]-genres[a])[0] || '-';
+        const diff = totalPrice - totalBuyPrice;
+        const diffText = diff > 0 ? `+¥${diff.toLocaleString()} お得に購入` : (diff < 0 ? `-¥${Math.abs(diff).toLocaleString()} 割高で購入` : '±0');
+
+        document.getElementById('analytics-summary').innerHTML = `
+            <div class="summary-box"><div class="lbl">有効アイテム数</div><div class="val">${targetList.length} <span style="font-size:12px;">本</span></div></div>
+            <div class="summary-box"><div class="lbl">定価総額 (資産価値)</div><div class="val">¥${totalPrice.toLocaleString()}</div></div>
+            <div class="summary-box" style="border-color:var(--accent-color);"><div class="lbl">実際の購入総額</div><div class="val">¥${totalBuyPrice.toLocaleString()}</div><div class="sub" style="color:${diff>0?'var(--success-color)':'var(--danger-color)'}">${diffText}</div></div>
+            <div class="summary-box"><div class="lbl">最多ハード</div><div class="val" style="font-size:16px;">${topPlatform}</div></div>
+            <div class="summary-box"><div class="lbl">最多ジャンル</div><div class="val" style="font-size:16px;">${topGenre}</div></div>
+        `;
+    }
+
+    function renderAnalyticsChart() {
+        const includeExcluded = document.getElementById('analytics-include-excluded').checked;
+        const targetList = gameList.filter(g => includeExcluded || !g.excludeAnalytics);
+        
+        if(targetList.length === 0) return;
+        
+        const axis = document.getElementById('analytics-axis').value; 
+        const type = document.getElementById('analytics-type').value;
+        let counts = {};
+
+        targetList.forEach(g => {
+            if (axis === 'peripherals') {
+                let parts = (g.peripherals || '指定なし').split(',').map(s=>s.trim()).filter(s=>s);
+                if(!parts.length) parts=['指定なし'];
+                parts.forEach(p => counts[p] = (counts[p]||0)+1);
+            }
+            else if (axis === 'dots') {
+                let dts = g.dots && g.dots.length ? g.dots : ['指定なし'];
+                dts.forEach(d => { 
+                    let label = dotNames[d] || '指定なし'; 
+                    counts[label] = (counts[label]||0)+1; 
+                });
+            }
+            else {
+                let key = '不明';
+                if (axis === 'platform') key = g.platform || '不明';
+                else if (axis === 'genre') key = g.genre || '未分類';
+                else if (axis === 'publisher') key = g.publisher || g.maker || '不明';
+                else if (axis === 'buyYear') key = g.buyDate ? g.buyDate.substring(0, 4) + '年' : '未設定';
+                else if (axis === 'buyMonth') key = g.buyDate ? g.buyDate.substring(0, 7).replace('-', '年') + '月' : '未設定';
+                else if (axis === 'releaseYear') key = g.release ? g.release.substring(0, 4) + '年' : '未設定';
+                else if (axis === 'rating') key = g.rating ? '★' + g.rating : '★未評価 (積みゲー等)';
+                else if (axis === 'priceRange') {
+                    let p = getNumPrice(g.price);
+                    if (p === 0) key = '不明 / 無料'; 
+                    else if (p < 3000) key = '〜2,999円'; 
+                    else if (p < 6000) key = '3,000〜5,999円';
+                    else if (p < 9000) key = '6,000〜8,999円'; 
+                    else key = '9,000円〜';
+                }
+                counts[key] = (counts[key] || 0) + 1;
+            }
+        });
+
+        let sorted = Object.keys(counts).map(k => ({ label: k, count: counts[k] }));
+        globalOthersData = []; 
+        
+        if (['buyYear', 'buyMonth', 'releaseYear', 'priceRange'].includes(axis)) {
+            sorted.sort((a, b) => a.label.localeCompare(b.label, 'ja'));
+        } else {
+            sorted.sort((a, b) => {
+                if(a.label.includes('不明') || a.label.includes('指定なし') || a.label.includes('未設定') || a.label.includes('未分類')) return 1;
+                if(b.label.includes('不明') || b.label.includes('指定なし') || b.label.includes('未設定') || b.label.includes('未分類')) return -1;
+                return b.count - a.count;
+            });
+            if(sorted.length > 15) {
+                const top = sorted.slice(0, 14);
+                globalOthersData = sorted.slice(14).map(s => s.label);
+                const othersCount = sorted.slice(14).reduce((sum, item) => sum + item.count, 0);
+                top.push({ label: '【圏外まとめ】', count: othersCount });
+                sorted = top;
+            }
+        }
+
+        const labels = sorted.map(s => s.label); 
+        const data = sorted.map(s => s.count);
+        const ctx = document.getElementById('analytics-chart').getContext('2d');
+        
+        if(analyticsChartObj) analyticsChartObj.destroy();
+        
+        analyticsChartObj = new Chart(ctx, {
+            type: type,
+            data: { 
+                labels: labels, 
+                datasets: [{ 
+                    label: '保有本数', 
+                    data: data, 
+                    backgroundColor: type === 'doughnut' ? chartColors : 'rgba(14, 165, 233, 0.7)', 
+                    borderColor: type === 'doughnut' ? '#fff' : 'rgba(14, 165, 233, 1)', 
+                    borderWidth: 1 
+                }] 
+            },
+            options: {
+                responsive: true, 
+                maintainAspectRatio: false,
+                plugins: { legend: { position: type === 'doughnut' ? 'right' : 'top', display: true } },
+                scales: type === 'bar' ? { y: { beginAtZero: true, ticks: { precision: 0 } } } : {},
+                onClick: (e, elements) => {
+                    if (elements.length > 0) {
+                        const index = elements[0].index;
+                        openAnalyticsDetailModal(axis, labels[index]);
+                    }
+                }
+            }
+        });
+
+        const textResultDiv = document.getElementById('analytics-text-result'); 
+        let html = '';
+        sorted.forEach((item, index) => {
+            const percent = ((item.count / targetList.length) * 100).toFixed(1);
+            html += `<div class="analytics-list-item" onclick="openAnalyticsDetailModal('${axis}', '${item.label}')"><span>${index + 1}. <strong>${item.label}</strong></span> <span>${item.count} 本 <span style="color:var(--text-muted); font-size:11px;">(${percent}%)</span></span></div>`;
+        });
+        textResultDiv.innerHTML = html;
+    }
+
+    // ドリルダウン詳細モーダル
+    function openAnalyticsDetailModal(axis, label) {
+        document.getElementById('analytics-detail-title').textContent = label;
+        const tbody = document.getElementById('analytics-detail-table-body'); 
+        tbody.innerHTML = '';
+        
+        const includeExcluded = document.getElementById('analytics-include-excluded').checked;
+        const matched = [];
+        
+        gameList.forEach((g, idx) => {
+            if(!includeExcluded && g.excludeAnalytics) return;
+            let isMatch = false;
+            
+            if (label === '【圏外まとめ】') {
+                let checkKey = getAxisKeyForGame(g, axis);
+                if(Array.isArray(checkKey)) { 
+                    if(checkKey.some(k => globalOthersData.includes(k))) isMatch = true; 
+                } else { 
+                    if(globalOthersData.includes(checkKey)) isMatch = true; 
+                }
+            } else {
+                let checkKey = getAxisKeyForGame(g, axis);
+                if(Array.isArray(checkKey)) { 
+                    if(checkKey.includes(label)) isMatch = true; 
+                } else { 
+                    if(checkKey === label) isMatch = true; 
+                }
+            }
+            if(isMatch) matched.push({ g: g, idx: idx });
+        });
+        
+        matched.forEach(item => {
+            const g = item.g;
+            const tr = document.createElement('tr');
+            tr.style.cursor = 'pointer';
+            tr.onclick = () => openModal(item.idx);
+            tr.innerHTML = `
+                <td><img src="${g.image || fallbackSrc}" class="img-preview" onerror="this.src=fallbackSrc"></td>
+                <td class="wrap-text" style="font-weight:700; color:var(--primary-color);">${escapeHtml(g.title)}${getMicroDotsHtml(g.dots)}</td>
+                <td style="font-size:11px; color:var(--text-muted);">${getShortPlatform(g.platform)}<br>${escapeHtml(g.genre || '')}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+        document.getElementById('analytics-detail-modal').style.display = 'flex';
+    }
+    
+    function getAxisKeyForGame(g, axis) {
+        if (axis === 'platform') return g.platform || '不明';
+        if (axis === 'genre') return g.genre || '未分類';
+        if (axis === 'publisher') return g.publisher || g.maker || '不明';
+        if (axis === 'buyYear') return g.buyDate ? g.buyDate.substring(0, 4) + '年' : '未設定';
+        if (axis === 'buyMonth') return g.buyDate ? g.buyDate.substring(0, 7).replace('-', '年') + '月' : '未設定';
+        if (axis === 'releaseYear') return g.release ? g.release.substring(0, 4) + '年' : '未設定';
+        if (axis === 'rating') return g.rating ? '★' + g.rating : '★未評価 (積みゲー等)';
+        if (axis === 'priceRange') {
+            let p = getNumPrice(g.price);
+            if (p === 0) return '不明 / 無料'; 
+            if (p < 3000) return '〜2,999円'; 
+            if (p < 6000) return '3,000〜5,999円';
+            if (p < 9000) return '6,000〜8,999円'; 
+            return '9,000円〜';
+        }
+        if (axis === 'peripherals') {
+            let parts = (g.peripherals || '指定なし').split(',').map(s=>s.trim()).filter(s=>s);
+            return parts.length ? parts : ['指定なし'];
+        }
+        if (axis === 'dots') {
+            let dts = g.dots && g.dots.length ? g.dots : ['指定なし'];
+            return dts.map(d => dotNames[d] || '指定なし');
+        }
+        return '不明';
+    }
+
+    function closeAnalyticsDetailModal() { 
+        document.getElementById('analytics-detail-modal').style.display = 'none'; 
+    }
+
+    // --- AI一括補完 ---
+    const fieldNames = { title: 'タイトル', platform: '機種', model: '型番', jan: 'JAN', release: '発売日', publisher: '販売', developer: '開発', genre: 'ジャンル', series: 'シリーズ', peripherals: '周辺機器', price: '定価' };
     let pendingAIUpdates = [];
-
-    function updatePromptPreview() {
-        const preview = document.getElementById('prompt-preview'); const aiList = [];
+    
+    function updatePromptPreview(fromBatchChange = false) {
+        const preview = document.getElementById('prompt-preview'); 
+        const targetType = document.getElementById('ai-target-type').value;
+        const batchSelect = document.getElementById('ai-target-batch');
+        
+        let aiList = [];
         gameList.forEach((g, idx) => { 
-            if (!g.isLocked) { 
-                aiList.push({ _id: idx, title: g.title, platform: g.platform, model: g.model || "", jan: g.jan || "", release: g.release || "", publisher: g.publisher || g.maker || "", developer: g.developer || "", genre: g.genre || "", series: g.series || "", price: g.price || "" }); 
+            if (!g.isLocked) {
+                if (targetType === 'missing') {
+                    const isMissing = !g.title || g.title.includes('AI取得待ち') || !g.publisher || !g.developer || !g.release || !g.genre || !g.model || !g.price;
+                    if (!isMissing) return; 
+                }
+                aiList.push({ 
+                    _id: idx, title: g.title, platform: g.platform, model: g.model || "", 
+                    jan: g.jan || "", release: g.release || "", publisher: g.publisher || g.maker || "", 
+                    developer: g.developer || "", genre: g.genre || "", series: g.series || "", 
+                    peripherals: g.peripherals || "", price: g.price || "" 
+                }); 
             } 
         });
-        if(aiList.length === 0) { preview.value = "対象データがありません。"; return; }
 
-        preview.value = `あなたは優秀なゲームデータベース管理者です。以下のゲームリストの情報を調査し、不足箇所を補完したJSON配列を出力してください。
+        const chunkSize = 30;
+        const totalChunks = Math.ceil(aiList.length / chunkSize);
+        
+        if (!fromBatchChange) {
+            batchSelect.innerHTML = '';
+            if (totalChunks === 0) {
+                batchSelect.innerHTML = '<option value="0">対象なし</option>';
+            } else {
+                for (let i = 0; i < totalChunks; i++) {
+                    const start = i * chunkSize + 1;
+                    const end = Math.min((i + 1) * chunkSize, aiList.length);
+                    batchSelect.innerHTML += `<option value="${i}">${start}〜${end}件目</option>`;
+                }
+            }
+        }
 
-【情報収集の最優先ルール】
-・メーカー公式サイトの情報を最優先してください。
-・セガハード（ドリームキャスト、セガサターン、メガドライブ等）のタイトル名、型番、定価、ジャンルについては、必ずセガハード大百科（https://www.sega.jp/history/hard/）などのセガ公式情報を優先して参照してください。
+        if(aiList.length === 0) { 
+            preview.value = "対象データなし。すべて補完済みか、データがありません。"; 
+            return; 
+        }
+        
+        const currentChunkIndex = parseInt(batchSelect.value) || 0;
+        const chunkedList = aiList.slice(currentChunkIndex * chunkSize, (currentChunkIndex + 1) * chunkSize);
 
-【データ補完ルール】
-1. タイトルに「AI取得待ち」が含まれる場合、必ず「jan」の値を検索キーにして正式な「title」と「platform」を特定・上書きしてください。
-2. その他のデータも、JAN等から特定できる正しい情報があれば補完してください。
-3. 「_id」は絶対に元の数値のまま変更しないでください。
-4. 【重要】補完や修正を行ったデータ（オブジェクト）のみを配列に入れて出力してください。変更箇所がないデータは出力から除外してください。
-5. Markdown記法 (\`\`\`json 等) や挨拶は一切含めず、純粋なJSONテキストのみを出力してください。
-
-${JSON.stringify(aiList, null, 2)}`;    
+        preview.value = `あなたは優秀なゲームデータベース管理者です。以下のゲームリスト(JSON)を調査し、不足している情報を補完したJSON配列を出力してください。
+【最優先ルール】セガハードはセガハード大百科等、公式サイトを優先。
+【補完ルール】
+1. 「AI取得待ち」はjanからタイトルと機種を特定する。
+2. その他の空欄や不足データも可能な限り埋める。
+3. 「_id」は絶対に変更しない。
+4. 【重要】補完や修正を行ったオブジェクトのみを配列に入れて出力する。変更箇所がないデータは除外。
+5. 純粋なJSONテキストのみ出力（Markdown記法や挨拶は不要）。\n\n${JSON.stringify(chunkedList, null, 2)}`;    
     }  
 
     function copyPrompt() { 
-        const prompt = document.getElementById('prompt-preview').value;
-        if(navigator.clipboard && window.isSecureContext) { navigator.clipboard.writeText(prompt).then(() => alert('コピーしました。')); } 
-        else { document.getElementById('prompt-preview').select(); document.execCommand('copy'); alert('コピーしました。'); }
+        const prompt = document.getElementById('prompt-preview').value; 
+        if(navigator.clipboard && window.isSecureContext) { 
+            navigator.clipboard.writeText(prompt).then(() => alert('コピーしました。AIに貼り付けてください。')); 
+        } else { 
+            document.getElementById('prompt-preview').select(); 
+            document.execCommand('copy'); 
+            alert('コピーしました。'); 
+        } 
     }
-    
-    function applyAIJson() { applyAIJsonCore(document.getElementById('ai-json-input').value); }
-    function importAIJsonFile(event) {
-        const file = event.target.files[0]; if (!file) return;
-        const reader = new FileReader(); reader.onload = function(e) { applyAIJsonCore(e.target.result); event.target.value = ''; }; reader.readAsText(file, 'UTF-8');
+
+    function applyAIJson() { 
+        applyAIJsonCore(document.getElementById('ai-json-input').value); 
     }
-    
-    // AIの揺れを強力に吸収するJSONパース処理
+
+    function importAIJsonFile(event) { 
+        const file = event.target.files[0]; 
+        if (!file) return; 
+        const reader = new FileReader(); 
+        reader.onload = function(e) { 
+            applyAIJsonCore(e.target.result); 
+            event.target.value = ''; 
+        }; 
+        reader.readAsText(file, 'UTF-8'); 
+    }
+
     function applyAIJsonCore(jsonString) {
-        let input = jsonString.trim(); if(!input) return;
+        let input = jsonString.trim(); 
+        if(!input) return;
         try {
-            // AIが挨拶文やMarkdownを含めてきた場合、強制的に [ から ] までを抽出
             const firstBracket = input.indexOf('[');
             const lastBracket = input.lastIndexOf(']');
-            if (firstBracket !== -1 && lastBracket !== -1) {
-                input = input.substring(firstBracket, lastBracket + 1);
+            if (firstBracket !== -1 && lastBracket !== -1) { 
+                input = input.substring(firstBracket, lastBracket + 1); 
             }
-            
             const aiData = JSON.parse(input); 
             if (!Array.isArray(aiData)) return alert("JSON配列が見つかりません。");
             
@@ -1098,83 +1810,206 @@ ${JSON.stringify(aiList, null, 2)}`;
                 if (aiG._id !== undefined && aiG._id >= 0 && aiG._id < gameList.length) {
                     const local = gameList[aiG._id];
                     if (local && !local.isLocked) {
-                        ['title','platform','model','jan','release','publisher','developer','genre','series','price'].forEach(k => { 
-                            const aiVal = aiG[k] != null ? String(aiG[k]).trim() : '';
+                        ['title','platform','model','jan','release','publisher','developer','genre','series','peripherals','price'].forEach(k => { 
+                            const aiVal = aiG[k] != null ? String(aiG[k]).trim() : ''; 
                             const localVal = local[k] != null ? String(local[k]).trim() : '';
                             if (aiVal !== '' && localVal !== aiVal) { 
-                                pendingAIUpdates.push({ id: aiG._id, title: local.title, field: k, fieldName: fieldNames[k] || k, oldVal: localVal || '(空)', newVal: aiVal });
+                                pendingAIUpdates.push({ 
+                                    id: aiG._id, title: local.title, field: k, fieldName: fieldNames[k] || k, 
+                                    oldVal: localVal || '(空)', newVal: aiVal 
+                                }); 
                             }
                         });
                     }
                 }
             });
-            if (pendingAIUpdates.length > 0) renderDiffModal(); else alert("更新項目がありません。"); 
-        } catch (e) { alert("JSON解析エラー: AIの回答から正しいデータを抽出できませんでした。\n詳細: " + e.message); }
+            
+            if (pendingAIUpdates.length > 0) renderDiffModal(); 
+            else alert("更新項目なし。"); 
+        } catch (e) { 
+            alert("JSON解析エラー: " + e.message); 
+        }
     }
-    
-    function renderDiffModal() {
-        const tbody = document.getElementById('diff-table-body'); tbody.innerHTML = '';
-        pendingAIUpdates.forEach((u, idx) => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `<td style="text-align:center;"><input type="checkbox" class="diff-checkbox" data-idx="${idx}" checked></td>
-                <td class="wrap-text" style="font-weight:bold;">${escapeHtml(u.title)}</td><td><span style="background:var(--border-light); padding:3px 6px; border-radius:4px;">${escapeHtml(u.fieldName)}</span></td>
-                <td style="color:var(--danger-color); text-decoration:line-through; font-size:11px;">${escapeHtml(u.oldVal || '(空)')}</td><td style="color:var(--success-color); font-weight:bold;">${escapeHtml(u.newVal)}</td>`;
-            tbody.appendChild(tr);
-        });
-        document.getElementById('diff-check-all').checked = true; document.getElementById('diff-modal').style.display = 'flex';
+
+    function renderDiffModal() { 
+        const tbody = document.getElementById('diff-table-body'); 
+        tbody.innerHTML = ''; 
+        
+        pendingAIUpdates.forEach((u, idx) => { 
+            const tr = document.createElement('tr'); 
+            tr.innerHTML = `
+                <td style="text-align:center;"><input type="checkbox" class="diff-checkbox" data-idx="${idx}" checked></td>
+                <td class="wrap-text" style="font-weight:bold;">${escapeHtml(u.title)}</td>
+                <td><span style="background:var(--border-light); padding:3px 6px; border-radius:4px;">${escapeHtml(u.fieldName)}</span></td>
+                <td style="color:var(--danger-color); text-decoration:line-through; font-size:11px;">${escapeHtml(u.oldVal || '(空)')}</td>
+                <td style="color:var(--success-color); font-weight:bold;">${escapeHtml(u.newVal)}</td>
+            `; 
+            tbody.appendChild(tr); 
+        }); 
+        
+        document.getElementById('diff-check-all').checked = true; 
+        document.getElementById('diff-modal').style.display = 'flex'; 
     }
-    function toggleAllDiffs(checkbox) { document.querySelectorAll('.diff-checkbox').forEach(cb => cb.checked = checkbox.checked); }
-    function closeDiffModal() { document.getElementById('diff-modal').style.display = 'none'; pendingAIUpdates = []; }
-    function commitAIUpdates() {
-        const checkboxes = document.querySelectorAll('.diff-checkbox'); let count = 0;
-        checkboxes.forEach(cb => { if (cb.checked) { const u = pendingAIUpdates[cb.getAttribute('data-idx')]; gameList[u.id][u.field] = u.newVal; count++; } });
-        if (count > 0) { executeSave(); renderEditorList(); buildFilters(); document.getElementById('ai-json-input').value = ''; alert(`⚡ ${count} 件更新しました！`); }
-        closeDiffModal();
+
+    function toggleAllDiffs(checkbox) { 
+        document.querySelectorAll('.diff-checkbox').forEach(cb => cb.checked = checkbox.checked); 
+    }
+
+    function closeDiffModal() { 
+        document.getElementById('diff-modal').style.display = 'none'; 
+        pendingAIUpdates = []; 
+    }
+
+    function commitAIUpdates() { 
+        const checkboxes = document.querySelectorAll('.diff-checkbox'); 
+        let count = 0; 
+        
+        checkboxes.forEach(cb => { 
+            if (cb.checked) { 
+                const u = pendingAIUpdates[cb.getAttribute('data-idx')]; 
+                gameList[u.id][u.field] = u.newVal; 
+                count++; 
+            } 
+        }); 
+        
+        if (count > 0) { 
+            executeSave(); 
+            renderEditorList(); 
+            buildFilters(); 
+            document.getElementById('ai-json-input').value = ''; 
+            alert(`⚡ ${count} 件更新！`); 
+        } 
+        closeDiffModal(); 
     }
 
     // --- エクスポート ---
     async function saveTextToFile(textData, defaultFileName, fileType) {
-        try {
-            if (window.showSaveFilePicker) {
-                const handle = await window.showSaveFilePicker({ suggestedName: defaultFileName, types: [{ description: fileType.desc, accept: fileType.accept }] });
-                const writable = await handle.createWritable(); await writable.write(textData); await writable.close(); alert(`💾 保存しました！`); return;
-            }
-        } catch (err) { if (err.name !== 'AbortError') console.error(err); return; }
-        const blob = new Blob([textData], { type: fileType.mime });
-        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = defaultFileName; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        try { 
+            if (window.showSaveFilePicker) { 
+                const handle = await window.showSaveFilePicker({ suggestedName: defaultFileName, types: [{ description: fileType.desc, accept: fileType.accept }] }); 
+                const writable = await handle.createWritable(); 
+                await writable.write(textData); 
+                await writable.close(); 
+                alert(`💾 保存しました！`); 
+                return; 
+            } 
+        } catch (err) { 
+            if (err.name !== 'AbortError') console.error(err); 
+            return; 
+        }
+        
+        const blob = new Blob([textData], { type: fileType.mime }); 
+        const a = document.createElement('a'); 
+        a.href = URL.createObjectURL(blob); 
+        a.download = defaultFileName; 
+        document.body.appendChild(a); 
+        a.click(); 
+        document.body.removeChild(a);
     }
-    function exportToJSON() { if (gameList.length===0) return; saveTextToFile(JSON.stringify(gameList, null, 2), `bitlog_DB_${new Date().toISOString().slice(0,10)}.json`, { desc: 'JSON', accept: {'application/json': ['.json']}, mime: 'application/json' }); }
+
+    function exportToJSON() { 
+        if (gameList.length === 0) return; 
+        saveTextToFile(JSON.stringify(gameList, null, 2), `bitlog_DB_${new Date().toISOString().slice(0,10)}.json`, { desc: 'JSON', accept: {'application/json': ['.json']}, mime: 'application/json' }); 
+    }
+
     function exportToAI_CSV() {
-        if (gameList.length===0) return;
-        let csv = "\uFEFF" + ["ID", "タイトル", "シリーズ", "対応ハード", "ジャンル", "販売", "開発", "型番", "JAN", "発売日", "定価"].join(",") + "\n";
-        gameList.forEach((g, idx) => { csv += [idx, `"${escapeCSV(g.title)}"`, `"${escapeCSV(g.series)}"`, `"${escapeCSV(g.platform)}"`, `"${escapeCSV(g.genre)}"`, `"${escapeCSV(g.publisher || g.maker)}"`, `"${escapeCSV(g.developer)}"`, `"${escapeCSV(g.model)}"`, `"${escapeCSV(g.jan)}"`, `"${escapeCSV(g.release)}"`, `"${g.price||''}"`].join(",") + "\n"; });
+        if (gameList.length === 0) return; 
+        let csv = "\uFEFF" + ["ID", "タイトル", "シリーズ", "対応ハード", "ジャンル", "周辺機器", "販売", "開発", "型番", "JAN", "発売日", "定価"].join(",") + "\n";
+        
+        gameList.forEach((g, idx) => { 
+            csv += [
+                idx, `"${escapeCSV(g.title)}"`, `"${escapeCSV(g.series)}"`, `"${escapeCSV(g.platform)}"`, 
+                `"${escapeCSV(g.genre)}"`, `"${escapeCSV(g.peripherals || '')}"`, `"${escapeCSV(g.publisher || g.maker)}"`, 
+                `"${escapeCSV(g.developer)}"`, `"${escapeCSV(g.model)}"`, `"${escapeCSV(g.jan)}"`, 
+                `"${escapeCSV(g.release)}"`, `"${g.price||''}"`
+            ].join(",") + "\n"; 
+        }); 
         saveTextToFile(csv, `bitlog_AI_${new Date().toISOString().slice(0,10)}.csv`, { desc: 'CSV', accept: {'text/csv': ['.csv']}, mime: 'text/csv;charset=utf-8;' });
     }
-    function escapeCSV(val) { return (val||'').replace(/"/g, '""'); }
-    function importFromCSV(event) {
-        const file = event.target.files[0]; if (!file) return; const reader = new FileReader();
-        reader.onload = function(e) {
-            const rows = e.target.result.split(/\r\n|\n/).map(row => {
-                const arr = []; let cur = ''; let inQ = false;
-                for (let i=0; i<row.length; i++) { if (row[i] === '"' && row[i+1] === '"') { cur += '"'; i++; } else if (row[i] === '"') inQ = !inQ; else if (row[i] === ',' && !inQ) { arr.push(cur); cur = ''; } else cur += row[i]; }
-                arr.push(cur); return arr;
-            });
-            if(rows.length <= 1) return; const imported = []; let up = 0, add = 0;
-            for(let i=1; i<rows.length; i++) {
-                const c = rows[i].map(v => v.trim()); if(c.length < 2 || !c[1]) continue;
-                let ex = gameList.findIndex(g => (c[8] && g.jan === c[8]) || (g.title === c[1] && g.platform === c[3]));
-                if (ex !== -1 && gameList[ex].isLocked) continue;
-                const data = { title: c[1]||"", series: c[2]||"", platform: c[3]||"その他", genre: c[4]||"", publisher: c[5]||"", developer: c[6]||"", model: c[7]||"", jan: c[8]||"", release: c[9]||"", price: c[10]||"", rating: "", shop: "", buyPrice: "", review: "", image: (ex!==-1)?gameList[ex].image:"", isLocked: false, dots: [] };
-                if (ex !== -1) { gameList[ex] = Object.assign(gameList[ex], data); up++; } else { imported.push(data); add++; }
-            }
-            if(confirm(`(上書き: ${up}件 / 新規: ${add}件) インポートしますか？`)) { gameList = [...gameList, ...imported]; executeSave(); updateCount(); renderEditorList(); buildFilters(); updatePromptPreview(); }
-            event.target.value = '';
-        }; reader.readAsText(file, 'UTF-8');
+
+    function escapeCSV(val) { 
+        return (val||'').replace(/"/g, '""'); 
     }
+
+    function importFromCSV(event) {
+        const file = event.target.files[0]; 
+        if (!file) return; 
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+            const rows = e.target.result.split(/\r\n|\n/).map(row => { 
+                const arr = []; let cur = ''; let inQ = false; 
+                for (let i=0; i<row.length; i++) { 
+                    if (row[i] === '"' && row[i+1] === '"') { cur += '"'; i++; } 
+                    else if (row[i] === '"') inQ = !inQ; 
+                    else if (row[i] === ',' && !inQ) { arr.push(cur); cur = ''; } 
+                    else cur += row[i]; 
+                } 
+                arr.push(cur); 
+                return arr; 
+            });
+            
+            if(rows.length <= 1) return; 
+            
+            const headers = rows[0].map(h => h.replace(/^"|"$/g, '').trim()); 
+            const getIdx = (name) => headers.indexOf(name);
+            const iTitle = getIdx("タイトル"), iSeries = getIdx("シリーズ"), iPlat = getIdx("対応ハード"), iGenre = getIdx("ジャンル"), iPeri = getIdx("周辺機器"), iPub = getIdx("販売"), iDev = getIdx("開発"), iMod = getIdx("型番"), iJan = getIdx("JANコード") !== -1 ? getIdx("JANコード") : getIdx("JAN"), iRel = getIdx("発売日"), iBuyD = getIdx("購入日"), iPrice = getIdx("定価"), iBuyP = getIdx("購入価格"), iShop = getIdx("購入店"), iRate = getIdx("評価"), iRev = getIdx("レビュー/メモ"), iImg = getIdx("画像パス"), iLock = getIdx("保護状態"), iExcl = getIdx("分析除外"), iDots = getIdx("印(Dot)");
+
+            const imported = []; 
+            let up = 0, add = 0;
+            
+            for(let i=1; i<rows.length; i++) {
+                const c = rows[i].map(v => v.trim()); 
+                if(c.length < 2 || iTitle === -1 || !c[iTitle]) continue;
+                
+                let ex = gameList.findIndex(g => (iJan !== -1 && c[iJan] && g.jan === c[iJan]) || (g.title === c[iTitle] && iPlat !== -1 && g.platform === c[iPlat]));
+                if (ex !== -1 && gameList[ex].isLocked) continue;
+                
+                const data = { 
+                    title: c[iTitle]||"", series: iSeries!==-1?c[iSeries]:"", platform: iPlat!==-1?c[iPlat]:"その他", genre: iGenre!==-1?c[iGenre]:"", peripherals: iPeri!==-1?c[iPeri]:"",
+                    publisher: iPub!==-1?c[iPub]:"", developer: iDev!==-1?c[iDev]:"", model: iMod!==-1?c[iMod]:"", jan: iJan!==-1?c[iJan]:"", release: iRel!==-1?c[iRel]:"", 
+                    price: iPrice!==-1?c[iPrice]:"", buyDate: iBuyD!==-1?c[iBuyD]:"", shop: iShop!==-1?c[iShop]:"", buyPrice: iBuyP!==-1?c[iBuyP]:"", rating: iRate!==-1?c[iRate]:"", 
+                    review: iRev!==-1?c[iRev]:"", image: (ex!==-1)?gameList[ex].image:(iImg!==-1?c[iImg]:""), 
+                    isLocked: iLock!==-1?(c[iLock]==="保護"):false, excludeAnalytics: iExcl!==-1?(c[iExcl]==="除外"):false, dots: iDots!==-1 && c[iDots]?c[iDots].split('|'):[]
+                };
+                
+                if (ex !== -1) { 
+                    gameList[ex] = Object.assign(gameList[ex], data); 
+                    up++; 
+                } else { 
+                    imported.push(data); 
+                    add++; 
+                }
+            }
+            if(confirm(`(上書き: ${up}件 / 新規: ${add}件) インポートしますか？`)) { 
+                gameList = [...gameList, ...imported]; 
+                executeSave(); 
+                updateCount(); 
+                renderEditorList(); 
+                buildFilters(); 
+                updatePromptPreview(); 
+            }
+            event.target.value = '';
+        }; 
+        reader.readAsText(file, 'UTF-8');
+    }
+
     function exportToFullCSV() {
-        if (gameList.length===0) return;
-        let csv = "\uFEFF" + ["ID", "タイトル", "シリーズ", "対応ハード", "ジャンル", "販売", "開発", "型番", "JANコード", "発売日", "定価", "購入店", "購入価格", "評価", "レビュー/メモ", "画像パス", "保護状態", "印(Dot)"].join(",") + "\n";
-        gameList.forEach((g, idx) => { csv += [idx, `"${escapeCSV(g.title)}"`, `"${escapeCSV(g.series)}"`, `"${escapeCSV(g.platform)}"`, `"${escapeCSV(g.genre)}"`, `"${escapeCSV(g.publisher || g.maker)}"`, `"${escapeCSV(g.developer)}"`, `"${escapeCSV(g.model)}"`, `"${escapeCSV(g.jan)}"`, `"${escapeCSV(g.release)}"`, `"${g.price || ''}"`, `"${escapeCSV(g.shop)}"`, `"${g.buyPrice || ''}"`, `"${g.rating || ''}"`, `"${escapeCSV(g.review)}"`, `"${escapeCSV(g.image)}"`, g.isLocked ? "保護" : "", `"${g.dots ? g.dots.join('|') : ''}"`].join(",") + "\n"; });
+        if (gameList.length === 0) return;
+        let csv = "\uFEFF" + ["ID", "タイトル", "シリーズ", "対応ハード", "ジャンル", "周辺機器", "販売", "開発", "型番", "JANコード", "発売日", "購入日", "定価", "購入店", "購入価格", "評価", "レビュー/メモ", "画像パス", "保護状態", "分析除外", "印(Dot)"].join(",") + "\n";
+        
+        gameList.forEach((g, idx) => { 
+            csv += [
+                idx, `"${escapeCSV(g.title)}"`, `"${escapeCSV(g.series)}"`, `"${escapeCSV(g.platform)}"`, 
+                `"${escapeCSV(g.genre)}"`, `"${escapeCSV(g.peripherals || '')}"`, `"${escapeCSV(g.publisher || g.maker)}"`, 
+                `"${escapeCSV(g.developer)}"`, `"${escapeCSV(g.model)}"`, `"${escapeCSV(g.jan)}"`, 
+                `"${escapeCSV(g.release)}"`, `"${escapeCSV(g.buyDate)}"`, `"${g.price || ''}"`, 
+                `"${escapeCSV(g.shop)}"`, `"${g.buyPrice || ''}"`, `"${g.rating || ''}"`, 
+                `"${escapeCSV(g.review)}"`, `"${escapeCSV(g.image)}"`, g.isLocked ? "保護" : "", 
+                g.excludeAnalytics ? "除外" : "", `"${g.dots ? g.dots.join('|') : ''}"`
+            ].join(",") + "\n"; 
+        });
+        
         saveTextToFile(csv, `bitlog_FullDB_${new Date().toISOString().slice(0,10)}.csv`, { desc: 'CSV', accept: {'text/csv': ['.csv']}, mime: 'text/csv;charset=utf-8;' });
     }
 </script>
